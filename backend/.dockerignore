@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+README.md
+FIX_*.md
+GET_*.md
+FIND_*.md
+UPDATE_*.md
+*.sql

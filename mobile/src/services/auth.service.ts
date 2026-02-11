@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { User } from '../types/auth.types';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.fincal.sbs/api';
 
 const authApi = axios.create({
   baseURL: `${API_BASE_URL}/auth`,

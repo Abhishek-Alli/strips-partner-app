@@ -25,10 +25,9 @@ class ApiClient {
   }> = [];
 
   constructor() {
-    // Enforce HTTPS in production (skip when using mock data)
+    // Warn (don't crash) if API URL is not HTTPS in production
     if (env.mode === 'production' && !USE_MOCK && !API_BASE_URL.startsWith('https://')) {
-      logger.error('API URL must use HTTPS in production', undefined, { apiUrl: API_BASE_URL });
-      throw new Error('API URL must use HTTPS in production');
+      logger.warn('API URL is not using HTTPS. Use HTTPS in production for security.', undefined, { apiUrl: API_BASE_URL });
     }
 
     this.client = axios.create({
