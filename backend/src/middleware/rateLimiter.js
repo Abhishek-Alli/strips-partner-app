@@ -6,15 +6,11 @@
 import rateLimit from 'express-rate-limit';
 import config from '../config/env.config.js';
 
-// Safe fallback values
-rateLimit: {
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
-  max: Number(process.env.RATE_LIMIT_MAX) || 100,
-  loginMax: Number(process.env.RATE_LIMIT_LOGIN_MAX) || 50,
-  otpMax: Number(process.env.RATE_LIMIT_OTP_MAX) || 3,
-},
+const windowMs = config?.rateLimit?.windowMs ?? 900000;
+const maxRequests = config?.rateLimit?.max ?? 100;
+const loginMax = config?.rateLimit?.loginMax ?? 5;
+const otpMax = config?.rateLimit?.otpMax ?? 3;
 
-// General API rate limiter
 const apiLimiter = rateLimit({
   windowMs: Number(windowMs),
   max: Number(maxRequests),
@@ -24,7 +20,6 @@ const apiLimiter = rateLimit({
   skip: (req) => req.path === '/health',
 });
 
-// Login rate limiter
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: Number(loginMax),
@@ -34,7 +29,6 @@ const loginLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
-// OTP rate limiter
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: Number(otpMax),
@@ -43,7 +37,6 @@ const otpLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Payment rate limiter
 const paymentLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
