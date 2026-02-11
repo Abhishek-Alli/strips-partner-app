@@ -1,41 +1,41 @@
 /**
  * Rate Limiting Middleware
- * 
  * Protects endpoints from abuse
  */
 
 import rateLimit from 'express-rate-limit';
 import config from '../config/env.config.js';
 
-const rateLimitConfig = config.rateLimit;
+// Safe fallback values
+const windowMs = config?.rateLimit?.windowMs ?? 900000; // 15 min
+const maxRequests = config?.rateLimit?.max ?? 100;
+const loginMax = config?.rateLimit?.loginMax ?? 5;
+const otpMax = config?.rateLimit?.otpMax ?? 3;
 
 // General API rate limiter
 const apiLimiter = rateLimit({
-  windowMs: rateLimitConfig.windowMs,
-  max: rateLimitConfig.max,
+  windowMs: Number(windowMs),
+  max: Number(maxRequests),
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => {
-    // Skip rate limiting for health checks
-    return req.path === '/health';
-  },
+  skip: (req) => req.path === '/health',
 });
 
-// Login rate limiter (stricter)
+// Login rate limiter
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: rateLimitConfig.loginMax,
+  windowMs: 15 * 60 * 1000,
+  max: Number(loginMax),
   message: 'Too many login attempts, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true, // Don't count successful logins
+  skipSuccessfulRequests: true,
 });
 
-// OTP rate limiter (very strict)
+// OTP rate limiter
 const otpLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: rateLimitConfig.otpMax,
+  windowMs: 15 * 60 * 1000,
+  max: Number(otpMax),
   message: 'Too many OTP requests, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -43,8 +43,8 @@ const otpLimiter = rateLimit({
 
 // Payment rate limiter
 const paymentLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 5, // 5 payment attempts per minute
+  windowMs: 60 * 1000,
+  max: 5,
   message: 'Too many payment attempts, please try again in a moment.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -56,4 +56,3 @@ export {
   otpLimiter,
   paymentLimiter,
 };
-
