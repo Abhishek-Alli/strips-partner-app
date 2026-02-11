@@ -159,9 +159,9 @@ const ReportsPage: React.FC = () => {
   return (
     <AdminLayout
       title="Reports"
-      requiredPermission={{ resource: 'analytics', action: 'view' }}
+      requiredPermission={ {resource: 'analytics', action: 'view' }}
     >
-      {/* Date Range and Export */}}
+      {/* Date Range and Export */}
       <Box
         sx={{
           display: 'flex',
