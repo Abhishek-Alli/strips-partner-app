@@ -1,0 +1,8 @@
+Create a file named ".env" in the mobile folder with this content:
+
+EXPO_PUBLIC_API_URL=http://192.168.6.237:3001/api
+EXPO_PUBLIC_USE_MOCK=false
+EXPO_PUBLIC_ENABLE_DEBUG=true
+
+
+

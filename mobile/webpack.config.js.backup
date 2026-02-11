@@ -1,0 +1,90 @@
+const createExpoWebpackConfigAsync = require('@expo/webpack-config');
+const path = require('path');
+
+module.exports = async function (env, argv) {
+  const config = await createExpoWebpackConfigAsync(env, argv);
+  
+  const sharedPath = path.resolve(__dirname, '../shared');
+  
+  // Add parent directory to module resolution so webpack can find ../shared
+  if (!config.resolve.modules) {
+    config.resolve.modules = [];
+  }
+  config.resolve.modules.push(path.resolve(__dirname, '..'));
+  
+  // Initialize aliases - merge with existing Expo aliases
+  config.resolve.alias = {
+    ...(config.resolve.alias || {}),
+    'expo-status-bar': require.resolve('./src/utils/statusBarShim.web.js'),
+    '@shared': sharedPath
+  };
+  
+  // Ensure webpack hot modules are available for webpack-dev-server
+  try {
+    if (!config.resolve.alias['webpack/hot/emitter']) {
+      config.resolve.alias['webpack/hot/emitter'] = require.resolve('webpack/hot/emitter.js');
+    }
+    if (!config.resolve.alias['webpack/hot/log']) {
+      config.resolve.alias['webpack/hot/log'] = require.resolve('webpack/hot/log.js');
+    }
+  } catch (e) {
+    // These might not be needed if Expo handles them
+    console.warn('Note: Could not resolve webpack hot modules - Expo may handle this:', e.message);
+  }
+  
+  // Only add essential fallbacks - let Expo handle the rest
+  if (!config.resolve.fallback) {
+    config.resolve.fallback = {};
+  }
+  
+  // Only add events fallback if needed for webpack-dev-server
+  if (!config.resolve.fallback.events) {
+    try {
+      config.resolve.fallback.events = require.resolve("events/");
+    } catch (e) {
+      // events package might not be needed if Expo handles it
+    }
+  }
+  
+  // Exclude shared directory from source-map-loader (it processes before babel)
+  const sharedPathNormalized = sharedPath.replace(/\\/g, '/');
+  
+  if (config.module && config.module.rules) {
+    config.module.rules.forEach((rule) => {
+      // Find source-map-loader rules and exclude shared directory
+      if (rule.enforce === 'pre' && rule.use) {
+        const uses = Array.isArray(rule.use) ? rule.use : [rule.use];
+        const hasSourceMapLoader = uses.some(
+          use => {
+            const loaderStr = typeof use === 'string' ? use : (use.loader || '');
+            return loaderStr.includes('source-map-loader');
+          }
+        );
+        
+        if (hasSourceMapLoader) {
+          // Add shared directory to exclude
+          const excludeFunc = (filePath) => {
+            if (!filePath) return false;
+            const normalized = filePath.replace(/\\/g, '/');
+            if (normalized.includes(sharedPathNormalized)) {
+              return true; // Exclude shared directory
+            }
+            // Apply original exclude
+            if (rule.exclude) {
+              if (typeof rule.exclude === 'function') {
+                return rule.exclude(filePath);
+              } else if (rule.exclude instanceof RegExp) {
+                return rule.exclude.test(filePath);
+              }
+            }
+            return false;
+          };
+          rule.exclude = excludeFunc;
+        }
+      }
+    });
+  }
+  
+  return config;
+};
+

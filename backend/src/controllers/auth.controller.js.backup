@@ -1,0 +1,25 @@
+// Adding logout endpoint for token blacklisting (optional enhancement)
+// This would require a token blacklist table in the database
+
+export const logout = async (req, res) => {
+  try {
+    // In a production system, you might want to:
+    // 1. Add refresh token to a blacklist table
+    // 2. Invalidate the token on the server side
+    // 3. Clear any server-side sessions
+    
+    // For now, frontend just clears local storage
+    // This is acceptable for JWT-based auth without server-side sessions
+    
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+
+

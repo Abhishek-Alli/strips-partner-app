@@ -1,0 +1,89 @@
+const createExpoWebpackConfigAsync = require('@expo/webpack-config');
+const path = require('path');
+
+module.exports = async function (env, argv) {
+  const config = await createExpoWebpackConfigAsync(env, argv);
+  
+  const sharedPath = path.resolve(__dirname, '../shared');
+  
+  // Add parent directory to module resolution so webpack can find ../shared
+  if (!config.resolve.modules) {
+    config.resolve.modules = [];
+  }
+  config.resolve.modules.push(path.resolve(__dirname, '..'));
+  
+  // Initialize aliases - merge with existing Expo aliases
+  // Only add what we absolutely need - let Expo handle webpack internals
+  config.resolve.alias = {
+    ...(config.resolve.alias || {}),
+    'expo-status-bar': require.resolve('./src/utils/statusBarShim.web.js'),
+    '@shared': sharedPath
+  };
+  
+  // Ensure events module is available for webpack-dev-server (if needed)
+  // Expo should handle this, but adding as safety
+  if (!config.resolve.fallback) {
+    config.resolve.fallback = {};
+  }
+  
+  if (!config.resolve.fallback.events) {
+    try {
+      config.resolve.fallback.events = require.resolve("events/");
+    } catch (e) {
+      // Expo should handle this
+    }
+  }
+  
+  // Exclude shared directory from source-map-loader (it processes before babel)
+  const sharedPathNormalized = sharedPath.replace(/\\/g, '/');
+  
+  if (config.module && config.module.rules) {
+    config.module.rules.forEach((rule) => {
+      // Find source-map-loader rules and exclude shared directory
+      if (rule.enforce === 'pre' && rule.use) {
+        const uses = Array.isArray(rule.use) ? rule.use : [rule.use];
+        const hasSourceMapLoader = uses.some(
+          use => {
+            const loaderStr = typeof use === 'string' ? use : (use.loader || '');
+            return loaderStr.includes('source-map-loader');
+          }
+        );
+        
+        if (hasSourceMapLoader) {
+          // Store original exclude BEFORE modifying rule.exclude
+          const originalExclude = rule.exclude;
+          
+          // Create new exclude function that calls the ORIGINAL exclude
+          rule.exclude = (filePath) => {
+            if (!filePath) return false;
+            const normalized = filePath.replace(/\\/g, '/');
+            
+            // Always exclude shared directory from source-map-loader
+            if (normalized.includes(sharedPathNormalized)) {
+              return true;
+            }
+            
+            // Apply original exclude logic (this is the stored original, not the new function)
+            if (originalExclude) {
+              if (typeof originalExclude === 'function') {
+                return originalExclude(filePath);
+              } else if (originalExclude instanceof RegExp) {
+                return originalExclude.test(filePath);
+              } else if (Array.isArray(originalExclude)) {
+                return originalExclude.some(excl => {
+                  if (typeof excl === 'function') return excl(filePath);
+                  if (excl instanceof RegExp) return excl.test(filePath);
+                  return filePath && filePath.includes(excl);
+                });
+              }
+            }
+            return false;
+          };
+        }
+      }
+    });
+  }
+  
+  return config;
+};
+
