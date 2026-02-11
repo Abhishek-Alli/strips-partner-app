@@ -8,7 +8,9 @@
     "start:port": "expo start --lan --port",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build": "expo export:web"
+
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
