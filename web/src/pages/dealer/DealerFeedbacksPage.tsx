@@ -91,7 +91,7 @@ const DealerFeedbacksPage: React.FC = () => {
     {
       key: 'userName',
       label: 'User',
-      render: (value?: string, row?: DealerFeedback) => value || row?.userEmail || 'Anonymous',
+      render: (value?: string) => value || 'Anonymous',
     },
     {
       key: 'rating',

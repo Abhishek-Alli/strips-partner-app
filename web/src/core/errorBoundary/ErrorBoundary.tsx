@@ -4,7 +4,7 @@
  * Catches React component errors and displays user-friendly fallback UI
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, Typography, Button, Container } from '@mui/material';
 import { logger } from '../logger';
 

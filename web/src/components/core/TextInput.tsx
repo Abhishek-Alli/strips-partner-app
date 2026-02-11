@@ -4,7 +4,7 @@
  * Clean input with floating label and clear states
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { TextField, TextFieldProps, InputAdornment } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { theme } from '../../theme';

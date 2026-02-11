@@ -28,7 +28,6 @@ const LoginPage = createLazyComponent(() => import('./pages/auth/LoginPage'));
 const AccessDeniedPage = createLazyComponent(() => import('./pages/auth/AccessDeniedPage'));
 const LandingPage = createLazyComponent(() => import('./pages/public/LandingPage'));
 const ContactUsPage = createLazyComponent(() => import('./pages/public/ContactUsPage'));
-const DashboardPage = createLazyComponent(() => import('./pages/dashboard/DashboardPage'));
 const UserManagementPage = createLazyComponent(() => import('./pages/admin/UserManagementPage'));
 const ContactEnquiriesPage = createLazyComponent(() => import('./pages/admin/ContactEnquiriesPage'));
 const PartnerManagementPage = createLazyComponent(() => import('./pages/admin/PartnerManagementPage'));

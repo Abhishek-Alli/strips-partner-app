@@ -28,7 +28,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import StarIcon from '@mui/icons-material/Star';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 import { DealerCard } from '../../components/admin';
-import { dealerManagementService, Dealer, DealerFilters } from '../../services/admin/dealerManagementService';
+import { dealerManagementService, Dealer } from '../../services/admin/dealerManagementService';
 import { logger } from '../../core/logger';
 import { useDebounce } from '../../hooks/useDebounce';
 

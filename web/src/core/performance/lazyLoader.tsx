@@ -4,32 +4,13 @@
  * Provides lazy loading with loading states and error boundaries
  */
 
-import React, { Suspense, ComponentType, lazy } from 'react';
-import { Box, CircularProgress } from '@mui/material';
-import { ErrorBoundary } from '../errorBoundary/ErrorBoundary';
-
-/**
- * Loading fallback component
- */
-const LoadingFallback: React.FC = () => (
-  <Box
-    sx={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '400px',
-    }}
-  >
-    <CircularProgress />
-  </Box>
-);
+import React, { ComponentType, lazy } from 'react';
 
 /**
  * Create a lazy-loaded component with error boundary and loading state
  */
 export function createLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
-  fallback?: React.ComponentType
 ): React.LazyExoticComponent<T> {
   return lazy(importFn) as React.LazyExoticComponent<T>;
 }

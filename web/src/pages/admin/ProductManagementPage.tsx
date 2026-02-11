@@ -53,7 +53,7 @@ const ProductManagementPage: React.FC = () => {
     description: '',
     category: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 

@@ -27,8 +27,6 @@ import { logger } from '../../core/logger';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 
 const DealerAnalyticsPage: React.FC = () => {
   const { user } = useAuth();

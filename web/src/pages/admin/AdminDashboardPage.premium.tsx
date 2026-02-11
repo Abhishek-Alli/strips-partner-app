@@ -11,9 +11,8 @@ import { UserRole } from '../../types/auth.types';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../services/apiClient';
 import { StatCard } from '../../components/core/StatCard';
-import { Card } from '../../components/core/Card';
 import { DataTable } from '../../components/table/DataTable';
-import { SkeletonLoader, TableSkeleton } from '../../components/core/SkeletonLoader';
+import { SkeletonLoader } from '../../components/core/SkeletonLoader';
 import { theme } from '../../theme';
 import { logger } from '../../core/logger';
 

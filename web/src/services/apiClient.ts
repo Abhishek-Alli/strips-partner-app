@@ -1,5 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { normalizeError, ApiError } from '../utils/apiError';
+
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+import { normalizeError } from '../utils/apiError';
 import { authService } from './authService';
 import { env } from '../core/env/config';
 import { logger } from '../core/logger';
@@ -68,7 +72,7 @@ class ApiClient {
         const originalRequest = error.config;
 
         // Handle 401 - token expired or not authenticated
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !(originalRequest as RetryableRequestConfig)._retry) {
           // Skip refresh attempt for auth endpoints (login, refresh, etc.)
           const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || 
                                 originalRequest.url?.includes('/auth/refresh') ||
@@ -121,7 +125,7 @@ class ApiClient {
         .catch((err) => Promise.reject(normalizeError(err)));
     }
 
-    originalRequest._retry = true;
+    (originalRequest as RetryableRequestConfig)._retry = true;
     this.isRefreshing = true;
 
     try {

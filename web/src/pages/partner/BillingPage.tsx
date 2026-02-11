@@ -8,8 +8,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Chip,
   Button
 } from '@mui/material';

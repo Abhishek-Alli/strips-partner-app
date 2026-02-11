@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Card, CardContent, Typography, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '@/services/authService'; // ✅ CORRECT: Using @ alias
 import { UserRole } from '@/types/auth.types';
 
 const SignupStep2_UserType: React.FC = () => {

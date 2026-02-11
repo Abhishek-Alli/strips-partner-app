@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Box, Chip } from '@mui/material';
+import { Chip } from '@mui/material';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import { theme } from '../../theme';
@@ -13,13 +13,13 @@ import { theme } from '../../theme';
 interface VerifiedBadgeProps {
   verified: boolean;
   pending?: boolean;
-  size?: 'sm' | 'md';
+  size?: 'small' | 'medium';
 }
 
 export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   verified,
   pending = false,
-  size = 'sm',
+  size = 'small',
 }) => {
   if (pending) {
     return (
@@ -28,7 +28,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
         label="Pending"
         size={size}
         sx={{
-          height: size === 'sm' ? 20 : 24,
+          height: size === 'small' ? 20 : 24,
           fontSize: theme.typography.fontSize.xs,
           backgroundColor: theme.colors.neutral[200],
           color: theme.colors.text.secondary,
@@ -50,7 +50,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
       label="Verified"
       size={size}
       sx={{
-        height: size === 'sm' ? 20 : 24,
+        height: size === 'small' ? 20 : 24,
         fontSize: theme.typography.fontSize.xs,
         backgroundColor: theme.colors.success[50],
         color: theme.colors.success[700],

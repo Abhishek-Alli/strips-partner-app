@@ -12,7 +12,6 @@ import {
   DialogActions,
   Button,
   IconButton,
-  Box
 } from '@mui/material';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 

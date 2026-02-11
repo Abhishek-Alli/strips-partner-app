@@ -20,7 +20,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
-import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../contexts/AuthContext';
@@ -192,7 +191,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           }}
         >
           <Avatar
-            src={user?.avatarUrl}
+            src={undefined}
             sx={{
               width: 40,
               height: 40,

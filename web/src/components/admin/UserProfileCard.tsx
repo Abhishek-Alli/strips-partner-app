@@ -37,9 +37,9 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
   email,
   phone,
   avatarUrl,
-  referralCode,
-  isActive = true,
-  onToggleActive,
+  referralCode: _referralCode,
+  isActive: _isActive = true,
+  onToggleActive: _onToggleActive,
   onViewDetails,
   onDelete,
 }) => {

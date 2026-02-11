@@ -44,8 +44,8 @@ export const DealerCard: React.FC<DealerCardProps> = ({
   logoUrl,
   rating,
   referralCode,
-  isActive = true,
-  onToggleActive,
+  isActive: _isActive = true,
+  onToggleActive: _onToggleActive,
   onViewDetails,
   onDelete,
 }) => {

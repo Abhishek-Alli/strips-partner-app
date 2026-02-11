@@ -9,7 +9,7 @@ import { Box, Typography } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
-interface KPICardProps {
+export interface KPICardProps {
   title: string;
   value: string | number;
   subtitle?: string;
@@ -18,6 +18,7 @@ interface KPICardProps {
     isPositive: boolean;
   };
   icon?: React.ReactNode;
+  color?: string;
 }
 
 export const KPICard: React.FC<KPICardProps> = ({

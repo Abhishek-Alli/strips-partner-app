@@ -17,16 +17,12 @@ import {
   MenuItem,
   Paper,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';
 import { useAuth } from '../../contexts/AuthContext';
 import { webAnalyticsService } from '../../services/analyticsService';
 import { PartnerAnalytics } from '@shared/core/analytics/analyticsTypes';
 import { KPICard } from '../../components/charts/KPICard';
-import { LineChart } from '../../components/charts/LineChart';
 import { logger } from '../../core/logger';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';

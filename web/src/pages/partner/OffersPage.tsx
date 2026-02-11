@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Chip } from '@mui/material';
+import { Box, Typography, Chip } from '@mui/material';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';
 import { useAuth } from '../../contexts/AuthContext';

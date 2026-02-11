@@ -34,8 +34,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getWorks(userId, filters);
       }
-      const response = await apiClient.get<Work[]>(`/business/works`, { params: { userId, ...filters } });
-      return response.data;
+      return apiClient.get<Work[]>(`/business/works`, { params: { userId, ...filters } });
     } catch (error) {
       logger.error('Failed to fetch works', error as Error);
       throw error;
@@ -48,8 +47,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.createWork(work);
       }
-      const response = await apiClient.post<Work>('/business/works', work);
-      return response.data;
+      return apiClient.post<Work>('/business/works', work);
     } catch (error) {
       logger.error('Failed to create work', error as Error);
       throw error;
@@ -62,8 +60,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.updateWork(workId, updates);
       }
-      const response = await apiClient.put<Work>(`/business/works/${workId}`, updates);
-      return response.data;
+      return apiClient.put<Work>(`/business/works/${workId}`, updates);
     } catch (error) {
       logger.error('Failed to update work', error as Error);
       throw error;
@@ -90,8 +87,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getEvents(filters);
       }
-      const response = await apiClient.get<Event[]>('/business/events', { params: filters });
-      return response.data;
+      return apiClient.get<Event[]>('/business/events', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch events', error as Error);
       throw error;
@@ -104,8 +100,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.createEvent(event);
       }
-      const response = await apiClient.post<Event>('/business/events', event);
-      return response.data;
+      return apiClient.post<Event>('/business/events', event);
     } catch (error) {
       logger.error('Failed to create event', error as Error);
       throw error;
@@ -119,8 +114,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getOffers(filters);
       }
-      const response = await apiClient.get<Offer[]>('/business/offers', { params: filters });
-      return response.data;
+      return apiClient.get<Offer[]>('/business/offers', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch offers', error as Error);
       throw error;
@@ -134,8 +128,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getLoyaltyPoints(userId);
       }
-      const response = await apiClient.get<{ total: number; history: LoyaltyPoint[] }>(`/business/loyalty/${userId}`);
-      return response.data;
+      return apiClient.get<{ total: number; history: LoyaltyPoint[] }>(`/business/loyalty/${userId}`);
     } catch (error) {
       logger.error('Failed to fetch loyalty points', error as Error);
       throw error;
@@ -149,8 +142,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getSteelMarketUpdates(filters);
       }
-      const response = await apiClient.get<SteelMarketUpdate[]>('/business/steel-updates', { params: filters });
-      return response.data;
+      return apiClient.get<SteelMarketUpdate[]>('/business/steel-updates', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch steel market updates', error as Error);
       throw error;
@@ -164,8 +156,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getLectures(filters);
       }
-      const response = await apiClient.get<Lecture[]>('/business/lectures', { params: filters });
-      return response.data;
+      return apiClient.get<Lecture[]>('/business/lectures', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch lectures', error as Error);
       throw error;
@@ -179,8 +170,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getTradingAdvices(filters);
       }
-      const response = await apiClient.get<TradingAdvice[]>('/business/trading-advices', { params: filters });
-      return response.data;
+      return apiClient.get<TradingAdvice[]>('/business/trading-advices', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch trading advices', error as Error);
       throw error;
@@ -194,8 +184,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getProjects(filters);
       }
-      const response = await apiClient.get<Project[]>('/business/projects', { params: filters });
-      return response.data;
+      return apiClient.get<Project[]>('/business/projects', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch projects', error as Error);
       throw error;
@@ -209,8 +198,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getTenders(filters);
       }
-      const response = await apiClient.get<Tender[]>('/business/tenders', { params: filters });
-      return response.data;
+      return apiClient.get<Tender[]>('/business/tenders', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch tenders', error as Error);
       throw error;
@@ -224,8 +212,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getEducationPosts(filters);
       }
-      const response = await apiClient.get<EducationPost[]>('/business/education-posts', { params: filters });
-      return response.data;
+      return apiClient.get<EducationPost[]>('/business/education-posts', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch education posts', error as Error);
       throw error;
@@ -239,8 +226,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getQuizzes(filters);
       }
-      const response = await apiClient.get<Quiz[]>('/business/quizzes', { params: filters });
-      return response.data;
+      return apiClient.get<Quiz[]>('/business/quizzes', { params: filters });
     } catch (error) {
       logger.error('Failed to fetch quizzes', error as Error);
       throw error;
@@ -253,8 +239,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.submitQuizAttempt(attempt);
       }
-      const response = await apiClient.post<QuizAttempt>('/business/quizzes/attempt', attempt);
-      return response.data;
+      return apiClient.post<QuizAttempt>('/business/quizzes/attempt', attempt);
     } catch (error) {
       logger.error('Failed to submit quiz attempt', error as Error);
       throw error;
@@ -268,8 +253,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getReferrals(userId);
       }
-      const response = await apiClient.get<Referral[]>(`/business/referrals/${userId}`);
-      return response.data;
+      return apiClient.get<Referral[]>(`/business/referrals/${userId}`);
     } catch (error) {
       logger.error('Failed to fetch referrals', error as Error);
       throw error;
@@ -282,8 +266,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.createReferral(referral);
       }
-      const response = await apiClient.post<Referral>('/business/referrals', referral);
-      return response.data;
+      return apiClient.post<Referral>('/business/referrals', referral);
     } catch (error) {
       logger.error('Failed to create referral', error as Error);
       throw error;
@@ -297,8 +280,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getGallery(userId, filters);
       }
-      const response = await apiClient.get<GalleryItem[]>(`/business/gallery/${userId}`, { params: filters });
-      return response.data;
+      return apiClient.get<GalleryItem[]>(`/business/gallery/${userId}`, { params: filters });
     } catch (error) {
       logger.error('Failed to fetch gallery', error as Error);
       throw error;
@@ -311,8 +293,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.addGalleryItem(item);
       }
-      const response = await apiClient.post<GalleryItem>('/business/gallery', item);
-      return response.data;
+      return apiClient.post<GalleryItem>('/business/gallery', item);
     } catch (error) {
       logger.error('Failed to add gallery item', error as Error);
       throw error;
@@ -339,8 +320,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getNotes(userId, filters);
       }
-      const response = await apiClient.get<Note[]>(`/business/notes/${userId}`, { params: filters });
-      return response.data;
+      return apiClient.get<Note[]>(`/business/notes/${userId}`, { params: filters });
     } catch (error) {
       logger.error('Failed to fetch notes', error as Error);
       throw error;
@@ -353,8 +333,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.createNote(note);
       }
-      const response = await apiClient.post<Note>('/business/notes', note);
-      return response.data;
+      return apiClient.post<Note>('/business/notes', note);
     } catch (error) {
       logger.error('Failed to create note', error as Error);
       throw error;
@@ -367,8 +346,7 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.updateNote(noteId, updates);
       }
-      const response = await apiClient.put<Note>(`/business/notes/${noteId}`, updates);
-      return response.data;
+      return apiClient.put<Note>(`/business/notes/${noteId}`, updates);
     } catch (error) {
       logger.error('Failed to update note', error as Error);
       throw error;
@@ -395,14 +373,13 @@ class WebBusinessService {
         const { businessService } = await import('../../../../shared/services/businessService');
         return businessService.getStatistics(userId, startDate, endDate);
       }
-      const response = await apiClient.get<Statistics>('/business/statistics', {
+      return apiClient.get<Statistics>('/business/statistics', {
         params: {
           userId,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch statistics', error as Error);
       throw error;

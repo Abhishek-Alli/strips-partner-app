@@ -2,6 +2,8 @@
  * Unit Tests for Budget Estimator
  */
 
+/// <reference types="jest" />
+
 import { estimateBudget } from '../budget/budgetEstimator';
 import { calculatePlotArea } from '../construction/areaCalculator';
 

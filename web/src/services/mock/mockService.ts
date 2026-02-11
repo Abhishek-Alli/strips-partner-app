@@ -6,7 +6,7 @@
  */
 
 import { delay, paginate, searchItems, mockUsers, mockDashboardStats } from './mockData';
-import { User, UserRole } from '../../types/auth.types';
+import { User } from '../../types/auth.types';
 
 export interface MockServiceConfig {
   delay?: number;
@@ -180,7 +180,7 @@ class MockService {
 
     const result = paginate(customers, page, limit);
     return this.simulateRequest({
-      customers: result.items,
+      items: result.items,
       pagination: {
         page: result.page,
         limit: result.limit,
@@ -201,7 +201,7 @@ class MockService {
 
     const result = paginate(orders, page, limit);
     return this.simulateRequest({
-      orders: result.items,
+      items: result.items,
       pagination: {
         page: result.page,
         limit: result.limit,

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Chip, Card, CardContent, Grid } from '@mui/material';
+import { Box, Typography, Button, Chip } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';

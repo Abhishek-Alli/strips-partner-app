@@ -88,7 +88,7 @@ function getDefaultErrorMessage(status: number): string {
 /**
  * Check if error is a specific type
  */
-export function isApiError(error: any, code?: string): error is ApiError {
+export function isApiError(error: any, _code?: string): error is ApiError {
   return error && typeof error === 'object' && 'code' in error && 'message' in error;
 }
 

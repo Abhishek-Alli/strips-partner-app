@@ -2,6 +2,8 @@
  * Unit Tests for Area Calculator
  */
 
+/// <reference types="jest" />
+
 import {
   calculatePlotArea,
   calculateBuiltUpArea,

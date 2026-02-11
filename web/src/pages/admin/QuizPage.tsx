@@ -20,7 +20,6 @@ import {
   LinearProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 
 interface QuestionSet {
@@ -28,12 +27,6 @@ interface QuestionSet {
   title: string;
   description: string;
   numberOfQuestions: number;
-}
-
-interface Question {
-  id: string;
-  question: string;
-  options: string[];
 }
 
 const mockQuestionSets: QuestionSet[] = Array.from({ length: 8 }, (_, i) => ({

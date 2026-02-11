@@ -56,7 +56,7 @@ const mockMessages: ContactMessage[] = Array.from({ length: 5 }, (_, i) => ({
 }));
 
 const CMSPage: React.FC = () => {
-  const [sections, setSections] = useState(mockSections);
+  const [sections] = useState(mockSections);
 
   const ImageUploadBox = () => (
     <Box

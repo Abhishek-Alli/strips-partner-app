@@ -15,7 +15,7 @@ import {
   Paper,
   Divider,
 } from '@mui/material';
-import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
+import SendIcon from '@mui/icons-material/Send';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';
 import { useAuth } from '../../contexts/AuthContext';

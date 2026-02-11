@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { SvgIcon, SvgIconProps } from '@mui/material';
+import { SvgIconProps } from '@mui/material';
 import * as MaterialIcons from '@mui/icons-material';
 import { iconMap, IconName } from '../../../../shared/icons/iconMap';
 

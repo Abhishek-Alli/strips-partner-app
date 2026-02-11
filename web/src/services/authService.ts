@@ -28,10 +28,6 @@ export interface RefreshTokenResponse {
  * Supports mock mode via environment variable
  */
 class AuthService {
-  private readonly ACCESS_TOKEN_KEY = 'auth_access_token';
-  private readonly REFRESH_TOKEN_KEY = 'auth_refresh_token';
-  private readonly USER_KEY = 'auth_user';
-
   /**
    * Login with email and password
    */

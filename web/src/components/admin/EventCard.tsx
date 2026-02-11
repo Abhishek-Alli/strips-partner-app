@@ -12,7 +12,6 @@ import {
   Paper,
   Switch,
   Button,
-  Chip,
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 

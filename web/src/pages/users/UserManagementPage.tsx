@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, Chip, IconButton } from '@mui/material';
+import { Box, Typography, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';

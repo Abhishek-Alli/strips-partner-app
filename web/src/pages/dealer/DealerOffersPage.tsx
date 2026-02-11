@@ -23,9 +23,7 @@ import { UserRole } from '../../types/auth.types';
 import { useAuth } from '../../contexts/AuthContext';
 import { webDealerService } from '../../services/dealer/dealerService';
 import { webBusinessService } from '../../services/business/businessService';
-import { apiClient } from '../../services/apiClient';
 import { Offer } from '../../../../shared/types/business.types';
-import { DealerOffer } from '../../../../shared/types/dealer.types';
 import { logger } from '../../core/logger';
 
 const DealerOffersPage: React.FC = () => {

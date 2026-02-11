@@ -15,7 +15,6 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-  IconButton,
   Collapse,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';

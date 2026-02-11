@@ -18,7 +18,6 @@ interface EnvConfig {
 }
 
 // Note: VITE_API_URL is optional - defaults to http://localhost:3001/api
-const requiredEnvVars: string[] = [];
 
 function validateEnv(): void {
   // Validate API URL is HTTPS in production

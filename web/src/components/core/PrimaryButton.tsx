@@ -39,7 +39,7 @@ const StyledButton = styled(Button)({
   },
 });
 
-interface PrimaryButtonProps extends Omit<ButtonProps, 'variant'> {
+interface PrimaryButtonProps extends Omit<ButtonProps, 'variant' | 'size'> {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg';
 }

@@ -6,7 +6,7 @@
 
 import { apiClient } from '../apiClient';
 import { logger } from '../../core/logger';
-import { PaymentIntent, PaymentFilter, PaymentService, PaymentStatus } from '@shared/core/payments/paymentTypes';
+import { PaymentIntent, PaymentFilter, PaymentService } from '@shared/core/payments/paymentTypes';
 
 class AdminPaymentService {
   /**

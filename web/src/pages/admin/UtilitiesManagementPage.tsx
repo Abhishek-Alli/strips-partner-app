@@ -32,7 +32,7 @@ const UtilitiesManagementPage: React.FC = () => {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [visualizationRequests, setVisualizationRequests] = useState<VisualizationRequest[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [checklistModalOpen, setChecklistModalOpen] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 

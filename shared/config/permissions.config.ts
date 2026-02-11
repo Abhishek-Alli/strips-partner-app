@@ -1,4 +1,4 @@
-import { RolePermissions, UserRole, Permission } from '../types/auth.types';
+import { RolePermissions, UserRole } from '../types/auth.types';
 
 /**
  * Centralized Permission Configuration

@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Link, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card } from '../../components/core/Card';
+import { MarketingCard as Card } from '../../components/core/Card';
 import { PrimaryButton } from '../../components/core/PrimaryButton';
 import { TextInput } from '../../components/core/TextInput';
 import { theme } from '../../theme';

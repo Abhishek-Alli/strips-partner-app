@@ -18,13 +18,14 @@ import { TableSkeleton } from './TableSkeleton';
 import { EmptyState } from './EmptyState';
 
 export interface Column<T = any> {
-  id: string;
+  id?: string;
+  key?: string;
   label: string;
   minWidth?: number;
   align?: 'left' | 'right' | 'center';
   sortable?: boolean;
   format?: (value: any, row: T) => React.ReactNode;
-  render?: (row: T) => React.ReactNode;
+  render?: (value: any, row: T) => React.ReactNode;
 }
 
 export interface RowAction<T = any> {
@@ -37,16 +38,19 @@ export interface RowAction<T = any> {
 
 export interface PaginationConfig {
   page: number;
-  rowsPerPage: number;
+  rowsPerPage?: number;
+  pageSize?: number;
   total: number;
   onPageChange: (page: number) => void;
-  onRowsPerPageChange: (rowsPerPage: number) => void;
+  onRowsPerPageChange?: (rowsPerPage: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export interface DataTableProps<T = any> {
   title?: string;
   columns: Column<T>[];
-  rows: T[];
+  rows?: T[];
+  data?: T[];
   loading?: boolean;
   pagination?: PaginationConfig;
   searchable?: boolean;
@@ -68,7 +72,8 @@ export interface DataTableProps<T = any> {
 export function DataTable<T = any>({
   title,
   columns,
-  rows = [],
+  rows,
+  data,
   loading = false,
   pagination,
   searchable = true,
@@ -88,8 +93,9 @@ export function DataTable<T = any>({
 }: DataTableProps<T>) {
   const [localSearchTerm, setLocalSearchTerm] = useState('');
 
-  // Ensure rows is always an array
-  const safeRows = Array.isArray(rows) ? rows : [];
+  // Ensure rows is always an array (support both 'rows' and 'data' props)
+  const resolvedRows = rows ?? data ?? [];
+  const safeRows = Array.isArray(resolvedRows) ? resolvedRows : [];
   const safeSelectedRows = Array.isArray(selectedRows) ? selectedRows : [];
 
   const handleSearch = (value: string) => {
@@ -137,8 +143,12 @@ export function DataTable<T = any>({
     return safeSelectedRows.length > 0 && safeSelectedRows.length < safeRows.length;
   }, [safeSelectedRows.length, safeRows.length]);
 
+  const getColumnId = (col: Column<T>) => col.id || col.key || '';
+  const resolvedRowsPerPage = pagination?.rowsPerPage ?? pagination?.pageSize ?? 10;
+  const resolvedOnRowsPerPageChange = pagination?.onRowsPerPageChange ?? pagination?.onPageSizeChange;
+
   if (loading) {
-    return <TableSkeleton columns={columns.length} rows={pagination?.rowsPerPage || 5} />;
+    return <TableSkeleton columns={columns.length} rows={resolvedRowsPerPage || 5} />;
   }
 
   return (
@@ -170,25 +180,28 @@ export function DataTable<T = any>({
                   />
                 </TableCell>
               )}
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align || 'left'}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {sortable && column.sortable !== false && onSort ? (
-                    <TableSortLabel
-                      active={sortBy === column.id}
-                      direction={sortBy === column.id ? sortOrder : 'asc'}
-                      onClick={() => handleSort(column.id)}
-                    >
-                      {column.label}
-                    </TableSortLabel>
-                  ) : (
-                    column.label
-                  )}
-                </TableCell>
-              ))}
+              {columns.map((column) => {
+                const colId = getColumnId(column);
+                return (
+                  <TableCell
+                    key={colId}
+                    align={column.align || 'left'}
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    {sortable && column.sortable !== false && onSort ? (
+                      <TableSortLabel
+                        active={sortBy === colId}
+                        direction={sortBy === colId ? sortOrder : 'asc'}
+                        onClick={() => handleSort(colId)}
+                      >
+                        {column.label}
+                      </TableSortLabel>
+                    ) : (
+                      column.label
+                    )}
+                  </TableCell>
+                );
+              })}
               {rowActions.length > 0 && (
                 <TableCell align="right" style={{ minWidth: 100 }}>
                   Actions
@@ -228,11 +241,12 @@ export function DataTable<T = any>({
                       </TableCell>
                     )}
                     {columns.map((column) => {
-                      const value = (row as any)[column.id];
+                      const colId = getColumnId(column);
+                      const value = (row as any)[colId];
                       return (
-                        <TableCell key={column.id} align={column.align || 'left'}>
+                        <TableCell key={colId} align={column.align || 'left'}>
                           {column.render
-                            ? column.render(row)
+                            ? column.render(value, row)
                             : column.format
                             ? column.format(value, row)
                             : value}
@@ -286,9 +300,9 @@ export function DataTable<T = any>({
           count={pagination.total}
           page={pagination.page}
           onPageChange={(_, newPage) => pagination.onPageChange(newPage)}
-          rowsPerPage={pagination.rowsPerPage}
+          rowsPerPage={resolvedRowsPerPage}
           onRowsPerPageChange={(e) =>
-            pagination.onRowsPerPageChange(parseInt(e.target.value, 10))
+            resolvedOnRowsPerPageChange?.(parseInt(e.target.value, 10))
           }
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
         />

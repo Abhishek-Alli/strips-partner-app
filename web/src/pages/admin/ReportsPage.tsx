@@ -8,7 +8,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
   Button,
   Tabs,
   Tab,
@@ -72,7 +71,7 @@ const ReportsPage: React.FC = () => {
   const [paymentReports, setPaymentReports] = useState<PaymentReport[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadReports();

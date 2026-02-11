@@ -13,7 +13,6 @@ import {
   UserActivityReport,
   EnquiryReport,
   PaymentReport,
-  AnalyticsEvent,
   AnalyticsEventPayload,
 } from '../../shared/core/analytics/analyticsTypes';
 
@@ -49,13 +48,12 @@ class WebAnalyticsService {
         return this.getMockAdminMetrics(startDate, endDate);
       }
 
-      const response = await apiClient.get<AdminDashboardMetrics>('/analytics/admin/dashboard', {
+      return apiClient.get<AdminDashboardMetrics>('/analytics/admin/dashboard', {
         params: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch admin dashboard metrics', error as Error);
       throw error;
@@ -75,14 +73,13 @@ class WebAnalyticsService {
         return this.getMockPartnerAnalytics(partnerId, startDate, endDate);
       }
 
-      const response = await apiClient.get<PartnerAnalytics>('/analytics/partner', {
+      return apiClient.get<PartnerAnalytics>('/analytics/partner', {
         params: {
           partnerId,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch partner analytics', error as Error);
       throw error;
@@ -102,14 +99,13 @@ class WebAnalyticsService {
         return this.getMockDealerAnalytics(dealerId, startDate, endDate);
       }
 
-      const response = await apiClient.get<DealerAnalytics>('/analytics/dealer', {
+      return apiClient.get<DealerAnalytics>('/analytics/dealer', {
         params: {
           dealerId,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch dealer analytics', error as Error);
       throw error;
@@ -129,14 +125,13 @@ class WebAnalyticsService {
         return this.getMockUserActivityReport(startDate, endDate);
       }
 
-      const response = await apiClient.get<UserActivityReport[]>('/analytics/reports/user-activity', {
+      return apiClient.get<UserActivityReport[]>('/analytics/reports/user-activity', {
         params: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
           userId,
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch user activity report', error as Error);
       throw error;
@@ -155,13 +150,12 @@ class WebAnalyticsService {
         return this.getMockEnquiryReport(startDate, endDate);
       }
 
-      const response = await apiClient.get<EnquiryReport[]>('/analytics/reports/enquiries', {
+      return apiClient.get<EnquiryReport[]>('/analytics/reports/enquiries', {
         params: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch enquiry report', error as Error);
       throw error;
@@ -180,13 +174,12 @@ class WebAnalyticsService {
         return this.getMockPaymentReport(startDate, endDate);
       }
 
-      const response = await apiClient.get<PaymentReport[]>('/analytics/reports/payments', {
+      return apiClient.get<PaymentReport[]>('/analytics/reports/payments', {
         params: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
         },
       });
-      return response.data;
     } catch (error) {
       logger.error('Failed to fetch payment report', error as Error);
       throw error;
@@ -202,7 +195,7 @@ class WebAnalyticsService {
     endDate: Date
   ): Promise<Blob> {
     try {
-      const response = await apiClient.get(`/analytics/reports/${reportType}/export`, {
+      return apiClient.get<Blob>(`/analytics/reports/${reportType}/export`, {
         params: {
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
@@ -210,7 +203,6 @@ class WebAnalyticsService {
         },
         responseType: 'blob',
       });
-      return response.data;
     } catch (error) {
       logger.error(`Failed to export ${reportType} report`, error as Error);
       throw error;
@@ -312,8 +304,8 @@ class WebAnalyticsService {
   }
 
   private getMockUserActivityReport(
-    startDate: Date,
-    endDate: Date
+    _startDate: Date,
+    _endDate: Date
   ): UserActivityReport[] {
     return [
       {
@@ -331,8 +323,8 @@ class WebAnalyticsService {
   }
 
   private getMockEnquiryReport(
-    startDate: Date,
-    endDate: Date
+    _startDate: Date,
+    _endDate: Date
   ): EnquiryReport[] {
     return [
       {
@@ -349,8 +341,8 @@ class WebAnalyticsService {
   }
 
   private getMockPaymentReport(
-    startDate: Date,
-    endDate: Date
+    _startDate: Date,
+    _endDate: Date
   ): PaymentReport[] {
     return [
       {

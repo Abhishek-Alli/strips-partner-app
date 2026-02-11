@@ -7,7 +7,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Card } from './Card';
+import { MarketingCard as Card } from './Card';
 import { theme } from '../../theme';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 import TrendingDownOutlinedIcon from '@mui/icons-material/TrendingDownOutlined';

@@ -11,7 +11,6 @@ import {
   Paper,
   Button,
   ButtonGroup,
-  Avatar,
   TextField,
   IconButton,
 } from '@mui/material';

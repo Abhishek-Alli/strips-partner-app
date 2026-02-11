@@ -23,8 +23,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.getMasterProducts();
       }
-      const response = await apiClient.get<MasterProduct[]>('/dealer/master-products');
-      return response.data;
+      return apiClient.get<MasterProduct[]>('/dealer/master-products');
     } catch (error) {
       logger.error('Failed to fetch master products', error as Error);
       throw error;
@@ -37,8 +36,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.getDealerProducts(dealerId);
       }
-      const response = await apiClient.get<DealerProduct[]>(`/dealer/products/${dealerId}`);
-      return response.data;
+      return apiClient.get<DealerProduct[]>(`/dealer/products/${dealerId}`);
     } catch (error) {
       logger.error('Failed to fetch dealer products', error as Error);
       throw error;
@@ -51,8 +49,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.addDealerProduct(product);
       }
-      const response = await apiClient.post<DealerProduct>('/dealer/products', product);
-      return response.data;
+      return apiClient.post<DealerProduct>('/dealer/products', product);
     } catch (error) {
       logger.error('Failed to add dealer product', error as Error);
       throw error;
@@ -65,8 +62,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.updateDealerProduct(productId, updates);
       }
-      const response = await apiClient.put<DealerProduct>(`/dealer/products/${productId}`, updates);
-      return response.data;
+      return apiClient.put<DealerProduct>(`/dealer/products/${productId}`, updates);
     } catch (error) {
       logger.error('Failed to update dealer product', error as Error);
       throw error;
@@ -93,8 +89,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.getDealerEnquiries(dealerId, filters);
       }
-      const response = await apiClient.get<DealerEnquiry[]>(`/dealer/enquiries/${dealerId}`, { params: filters });
-      return response.data;
+      return apiClient.get<DealerEnquiry[]>(`/dealer/enquiries/${dealerId}`, { params: filters });
     } catch (error) {
       logger.error('Failed to fetch dealer enquiries', error as Error);
       throw error;
@@ -107,8 +102,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.respondToEnquiry(enquiryId, response);
       }
-      const response_data = await apiClient.post<DealerEnquiry>(`/dealer/enquiries/${enquiryId}/respond`, { response });
-      return response_data.data;
+      return apiClient.post<DealerEnquiry>(`/dealer/enquiries/${enquiryId}/respond`, { response });
     } catch (error) {
       logger.error('Failed to respond to enquiry', error as Error);
       throw error;
@@ -135,8 +129,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.getDealerFeedbacks(dealerId);
       }
-      const response = await apiClient.get<DealerFeedback[]>(`/dealer/feedbacks/${dealerId}`);
-      return response.data;
+      return apiClient.get<DealerFeedback[]>(`/dealer/feedbacks/${dealerId}`);
     } catch (error) {
       logger.error('Failed to fetch dealer feedbacks', error as Error);
       throw error;
@@ -163,8 +156,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.getDealerOffers(dealerId);
       }
-      const response = await apiClient.get<DealerOffer[]>(`/dealer/offers/${dealerId}`);
-      return response.data;
+      return apiClient.get<DealerOffer[]>(`/dealer/offers/${dealerId}`);
     } catch (error) {
       logger.error('Failed to fetch dealer offers', error as Error);
       throw error;
@@ -177,8 +169,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.likeOffer(dealerId, offerId);
       }
-      const response = await apiClient.post<DealerOffer>(`/dealer/offers/${offerId}/like`, { dealerId });
-      return response.data;
+      return apiClient.post<DealerOffer>(`/dealer/offers/${offerId}/like`, { dealerId });
     } catch (error) {
       logger.error('Failed to like offer', error as Error);
       throw error;
@@ -192,8 +183,7 @@ class WebDealerService {
         const { dealerService } = await import('../../../../shared/services/dealerService');
         return dealerService.getDealerStats(dealerId);
       }
-      const response = await apiClient.get<DealerStats>(`/dealer/stats/${dealerId}`);
-      return response.data;
+      return apiClient.get<DealerStats>(`/dealer/stats/${dealerId}`);
     } catch (error) {
       logger.error('Failed to fetch dealer stats', error as Error);
       throw error;

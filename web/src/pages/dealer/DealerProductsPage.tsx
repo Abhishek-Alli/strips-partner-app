@@ -81,7 +81,7 @@ const DealerProductsPage: React.FC = () => {
       productId: product.productId,
       price: product.price?.toString() || '',
       unit: product.unit || '',
-      status: product.status,
+      status: product.status === 'pending' ? 'active' : product.status,
     });
     setIsDialogOpen(true);
   };
@@ -110,9 +110,11 @@ const DealerProductsPage: React.FC = () => {
           status: formData.status,
         });
       } else {
+        const selectedMaster = masterProducts.find(mp => mp.id === formData.productId);
         await webDealerService.addDealerProduct({
           dealerId: user.id,
           productId: formData.productId,
+          productName: selectedMaster?.name || '',
           price: formData.price ? parseFloat(formData.price) : undefined,
           unit: formData.unit,
           status: formData.status,

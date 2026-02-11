@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { AuthState, User, UserRole } from '../types/auth.types';
+import { AuthState, UserRole } from '../types/auth.types';
 import { authService } from '../services/authService';
 import { hasPermission as checkPermission } from '../constants/permissions';
 import { tokenStorage } from '../core/security/tokenStorage';
