@@ -18,8 +18,10 @@ export interface Partner {
   status: 'pending' | 'approved' | 'rejected' | 'suspended';
   createdAt: string;
   profileImage?: string;
+  avatarUrl?: string;
   location?: string;
   description?: string;
+  referralCode?: string;
 }
 
 export interface PartnerFilters {

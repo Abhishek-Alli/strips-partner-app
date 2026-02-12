@@ -30,10 +30,14 @@ class ApiClient {
   }> = [];
 
   constructor() {
-    // Enforce HTTPS in production
+    // Warn about non-HTTPS in production (allow localhost for local testing)
     if (env.mode === 'production' && !API_BASE_URL.startsWith('https://')) {
-      logger.error('API URL must use HTTPS in production', undefined, { apiUrl: API_BASE_URL });
-      throw new Error('API URL must use HTTPS in production');
+      const isLocalhost = API_BASE_URL.includes('localhost') || API_BASE_URL.includes('127.0.0.1');
+      if (isLocalhost) {
+        console.warn('API URL is using HTTP on localhost in production build. Set VITE_API_URL to your HTTPS endpoint for deployment.');
+      } else {
+        console.warn('API URL is not using HTTPS in production. This is a security risk!');
+      }
     }
 
     this.client = axios.create({

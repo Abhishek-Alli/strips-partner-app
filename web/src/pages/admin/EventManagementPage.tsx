@@ -62,7 +62,7 @@ const EventManagementPage: React.FC = () => {
     location: '',
     status: 'OPEN' as 'OPEN' | 'CLOSED' | 'CANCELLED',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 
@@ -149,14 +149,6 @@ const EventManagementPage: React.FC = () => {
     } catch (err) {
       logger.error('Failed to add event', err as Error);
       setError('Failed to add event. Please try again.');
-    }
-  };
-
-  const handleViewDetails = (id: string) => {
-    const event = events.find((e) => e.id === id);
-    if (event) {
-      setSelectedEvent(event);
-      setViewModalOpen(true);
     }
   };
 

@@ -19,8 +19,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  TextField
+  DialogActions
 } from '@mui/material';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';

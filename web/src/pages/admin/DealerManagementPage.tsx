@@ -32,8 +32,6 @@ import { dealerManagementService, Dealer } from '../../services/admin/dealerMana
 import { logger } from '../../core/logger';
 import { useDebounce } from '../../hooks/useDebounce';
 
-const ITEMS_PER_PAGE = 12;
-
 const DealerManagementPage: React.FC = () => {
   const [dealers, setDealers] = useState<Dealer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +49,7 @@ const DealerManagementPage: React.FC = () => {
     description: '',
     location: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 

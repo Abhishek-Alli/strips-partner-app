@@ -194,7 +194,7 @@ class MockService {
     const orders = Array.from({ length: 30 }, (_, i) => ({
       id: String(i + 1),
       customer: `Customer ${i + 1}`,
-      status: ['pending', 'processing', 'completed'][i % 3],
+      status: (['pending', 'processing', 'completed'] as const)[i % 3],
       amount: `₹${(Math.random() * 50000).toFixed(2)}`,
       createdAt: new Date(Date.now() - i * 86400000).toISOString()
     }));

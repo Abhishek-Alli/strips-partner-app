@@ -15,7 +15,7 @@ export interface ValidationResult {
 export function validateAreaInput(
   length: number,
   width: number,
-  unit: 'ft' | 'm'
+  _unit: 'ft' | 'm'
 ): ValidationResult {
   if (length <= 0) {
     return { valid: false, error: 'Length must be greater than 0' };

@@ -146,7 +146,10 @@ const DealerEnquiriesPage: React.FC = () => {
               data={enquiries}
               columns={enquiryColumns}
               loading={loading}
-              onRowClick={handleEnquirySelect}
+              rowActions={[{
+                label: 'View',
+                onClick: handleEnquirySelect,
+              }]}
             />
           </Grid>
 

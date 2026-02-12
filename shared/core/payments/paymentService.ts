@@ -12,7 +12,8 @@ import {
   PaymentIntent,
   PaymentStatus,
   PaymentProvider,
-  PaymentFilter
+  PaymentFilter,
+  PaymentService as PaymentServiceEnum
 } from './paymentTypes';
 import { validateAmount, validateService, validateStatusTransition } from './validators/paymentValidators';
 import { getServicePricing } from './paymentConstants';
@@ -179,7 +180,7 @@ export class PaymentService {
   /**
    * Check if user has access to paid service
    */
-  hasServiceAccess(userId: string, service: PaymentService): boolean {
+  hasServiceAccess(userId: string, service: PaymentServiceEnum): boolean {
     const payments = this.getPaymentIntents({
       userId,
       service,

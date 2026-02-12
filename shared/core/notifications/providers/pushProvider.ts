@@ -33,8 +33,8 @@ export class TestPushProvider implements PushProvider {
     recipient: NotificationRecipient,
     title: string,
     body: string,
-    data?: Record<string, any>,
-    metadata?: Record<string, any>
+    _data?: Record<string, any>,
+    _metadata?: Record<string, any>
   ): Promise<NotificationResult> {
     if (!this.isEnabled) {
       return {

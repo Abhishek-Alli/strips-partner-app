@@ -32,7 +32,7 @@ export class TestEmailProvider implements EmailProvider {
   async sendEmail(
     recipient: NotificationRecipient,
     template: EmailTemplate,
-    metadata?: Record<string, any>
+    _metadata?: Record<string, any>
   ): Promise<NotificationResult> {
     if (!this.isEnabled) {
       return {

@@ -61,7 +61,7 @@ const EnquiryManagementPage: React.FC = () => {
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [responseText, setResponseText] = useState('');
   const [noteText, setNoteText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadEnquiries();

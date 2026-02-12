@@ -14,19 +14,19 @@ export const smsTemplates: Record<NotificationEvent, (variables: Record<string, 
   [NotificationEvent.OTP_SENT]: (vars) => 
     `Your Shree Om OTP is ${getVariable(vars, 'otp', '')}. Valid for ${getVariable(vars, 'expiryMinutes', '10')} min. Do not share.`,
 
-  [NotificationEvent.OTP_VERIFIED]: (vars) => 
+  [NotificationEvent.OTP_VERIFIED]: (_vars) =>
     `Your OTP has been verified successfully. Welcome to Shree Om!`,
 
   [NotificationEvent.PASSWORD_RESET_REQUESTED]: (vars) => 
     `Your Shree Om password reset OTP is ${getVariable(vars, 'otp', '')}. Valid for ${getVariable(vars, 'expiryMinutes', '10')} min.`,
 
-  [NotificationEvent.PASSWORD_RESET_SUCCESS]: (vars) => 
+  [NotificationEvent.PASSWORD_RESET_SUCCESS]: (_vars) =>
     `Your Shree Om password has been reset successfully. If you didn't do this, contact support immediately.`,
 
-  [NotificationEvent.USER_REGISTERED]: (vars) => 
+  [NotificationEvent.USER_REGISTERED]: (_vars) =>
     `Welcome to Shree Om! Your account has been created successfully. Start exploring now.`,
 
-  [NotificationEvent.CONTACT_US_SUBMITTED]: (vars) => 
+  [NotificationEvent.CONTACT_US_SUBMITTED]: (_vars) =>
     `Thank you for contacting Shree Om. We have received your message and will respond soon.`,
 
   [NotificationEvent.ENQUIRY_SENT]: (vars) => 
@@ -38,16 +38,16 @@ export const smsTemplates: Record<NotificationEvent, (variables: Record<string, 
   [NotificationEvent.ADMIN_MESSAGE]: (vars) => 
     `Shree Om: ${getVariable(vars, 'message', 'You have a new message. Check your app for details.')}`,
 
-  [NotificationEvent.PARTNER_APPROVED]: (vars) => 
+  [NotificationEvent.PARTNER_APPROVED]: (_vars) =>
     `Congratulations! Your Shree Om partner application has been approved. Access your dashboard now.`,
 
-  [NotificationEvent.PARTNER_REJECTED]: (vars) => 
+  [NotificationEvent.PARTNER_REJECTED]: (_vars) =>
     `Your Shree Om partner application status has been updated. Please check your email or app for details.`,
 
-  [NotificationEvent.DEALER_APPROVED]: (vars) => 
+  [NotificationEvent.DEALER_APPROVED]: (_vars) =>
     `Congratulations! Your Shree Om dealer application has been approved. Access your dashboard now.`,
 
-  [NotificationEvent.DEALER_REJECTED]: (vars) => 
+  [NotificationEvent.DEALER_REJECTED]: (_vars) =>
     `Your Shree Om dealer application status has been updated. Please check your email or app for details.`,
 
   [NotificationEvent.SYSTEM_UPDATE]: (vars) => 

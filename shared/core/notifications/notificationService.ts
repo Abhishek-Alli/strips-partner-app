@@ -10,8 +10,6 @@ import {
   NotificationResult,
   NotificationChannel,
   NotificationEvent,
-  NotificationRecipient,
-  NotificationTemplate,
   NotificationLog
 } from './notificationTypes';
 import { emailTemplates } from './templates/emailTemplates';

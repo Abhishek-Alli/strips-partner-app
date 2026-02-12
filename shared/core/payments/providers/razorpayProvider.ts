@@ -127,7 +127,7 @@ export class RazorpayProvider {
   /**
    * Get order status from Razorpay
    */
-  async getOrderStatus(orderId: string): Promise<{ status: string; amount: number }> {
+  async getOrderStatus(_orderId: string): Promise<{ status: string; amount: number }> {
     try {
       // In test mode, simulate status check
       if (this.config.testMode || process.env.NODE_ENV === 'test') {

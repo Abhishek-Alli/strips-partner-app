@@ -14,7 +14,7 @@ import {
   EnquiryReport,
   PaymentReport,
   AnalyticsEventPayload,
-} from '../../shared/core/analytics/analyticsTypes';
+} from '@shared/core/analytics/analyticsTypes';
 
 class WebAnalyticsService {
   /**
@@ -24,7 +24,7 @@ class WebAnalyticsService {
     try {
       if (apiClient.isMockMode()) {
         // In mock mode, just log
-        logger.info('Analytics event tracked (mock)', payload.event);
+        logger.info('Analytics event tracked (mock)', { event: payload.event });
         return;
       }
 
@@ -317,7 +317,7 @@ class WebAnalyticsService {
         totalEnquiries: 8,
         totalPayments: 2,
         totalSpent: 1500,
-        period: { start: startDate, end: endDate },
+        period: { start: _startDate, end: _endDate },
       },
     ];
   }

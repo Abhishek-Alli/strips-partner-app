@@ -10,8 +10,8 @@ export * from './auth.types';
 // Business & Content Types
 export * from './business.types';
 
-// Dealer Types
-export * from './dealer.types';
+// Dealer Types (excluding DealerEnquiry and DealerFeedback which are in enquiry.types)
+export type { DealerProduct, MasterProduct, DealerOffer, DealerStats } from './dealer.types';
 
 // Order & Payment Types
 export * from './order.types';
@@ -25,8 +25,7 @@ export * from './enquiry.types';
 // Messaging & Notification Types
 export * from './messaging.types';
 
-// Notification Events (legacy)
-export * from './notification.types';
+// Notification Events (legacy) - removed: module './notification.types' does not exist
 
 // ============================================================================
 // COMMON TYPES

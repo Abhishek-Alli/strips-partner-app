@@ -94,7 +94,7 @@ export class DealerService {
     return enquiry;
   }
 
-  async sendEnquiryToAdmin(dealerId: string, topic: string, message: string): Promise<void> {
+  async sendEnquiryToAdmin(dealerId: string, topic: string, _message: string): Promise<void> {
     // In production, this would create an enquiry with admin as recipient
     await new Promise(resolve => setTimeout(resolve, 200));
     console.log(`Dealer ${dealerId} sent enquiry to admin: ${topic}`);

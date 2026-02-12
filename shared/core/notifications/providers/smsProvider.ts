@@ -30,7 +30,7 @@ export class TestSMSProvider implements SMSProvider {
   async sendSMS(
     recipient: NotificationRecipient,
     message: string,
-    metadata?: Record<string, any>
+    _metadata?: Record<string, any>
   ): Promise<NotificationResult> {
     if (!this.isEnabled) {
       return {

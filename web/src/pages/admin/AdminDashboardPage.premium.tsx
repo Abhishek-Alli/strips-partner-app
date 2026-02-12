@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography, Card } from '@mui/material';
 import { ProtectedRoute } from '../../components/guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -191,7 +191,7 @@ const AdminDashboardPage: React.FC = () => {
                     { key: 'email', label: 'Email' },
                     { key: 'role', label: 'Role' },
                   ]}
-                  pagination={false}
+                  pagination={undefined}
                 />
               )}
             </Card>
@@ -229,7 +229,7 @@ const AdminDashboardPage: React.FC = () => {
                     { key: 'email', label: 'Email' },
                     { key: 'status', label: 'Status' },
                   ]}
-                  pagination={false}
+                  pagination={undefined}
                 />
               )}
             </Card>
@@ -267,7 +267,7 @@ const AdminDashboardPage: React.FC = () => {
                     { key: 'email', label: 'Email' },
                     { key: 'status', label: 'Status' },
                   ]}
-                  pagination={false}
+                  pagination={undefined}
                 />
               )}
             </Card>

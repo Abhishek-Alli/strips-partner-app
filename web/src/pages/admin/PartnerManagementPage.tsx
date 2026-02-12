@@ -31,12 +31,9 @@ import { PartnerCard } from '../../components/admin';
 import {
   partnerManagementService,
   Partner,
-  PartnerFilters,
 } from '../../services/admin/partnerManagementService';
 import { logger } from '../../core/logger';
 import { useDebounce } from '../../hooks/useDebounce';
-
-const ITEMS_PER_PAGE = 12;
 
 const PartnerManagementPage: React.FC = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -61,7 +58,7 @@ const PartnerManagementPage: React.FC = () => {
     location: '',
     category: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 
@@ -299,7 +296,7 @@ const PartnerManagementPage: React.FC = () => {
                   id={partner.id}
                   name={partner.name}
                   email={partner.email}
-                  phone={partner.phone}
+                  phone={partner.phone || ''}
                   category={partner.category}
                   avatarUrl={partner.avatarUrl}
                   rating={partner.rating}

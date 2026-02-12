@@ -55,6 +55,7 @@ const FeedbackModerationPage: React.FC = () => {
     rating: '',
     status: '',
   });
+  const [, setError] = useState<string | null>(null);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
     null
   );
