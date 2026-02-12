@@ -113,7 +113,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
-    await authService.logout();
+    try {
+      await authService.logout();
+    } catch (e) {
+      // Storage clear failed - log but continue with state reset
+      console.warn('Failed to clear stored auth:', e);
+    }
+    // Always clear in-memory state so navigation resets to Login
     setState({
       user: null,
       accessToken: null,

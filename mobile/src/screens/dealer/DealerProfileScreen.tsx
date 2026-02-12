@@ -58,25 +58,34 @@ const DealerProfileScreen: React.FC = () => {
     setConfirmPassword('');
   };
 
+  const performLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {
+      console.warn('Logout error:', e);
+      await logout().catch(() => {});
+    }
+  };
+
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-            } catch {
-              Alert.alert('Error', 'Failed to logout. Please try again.');
-            }
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to logout?')) {
+        performLogout();
+      }
+    } else {
+      Alert.alert(
+        'Logout',
+        'Are you sure you want to logout?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Logout',
+            style: 'destructive',
+            onPress: performLogout,
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   return (
