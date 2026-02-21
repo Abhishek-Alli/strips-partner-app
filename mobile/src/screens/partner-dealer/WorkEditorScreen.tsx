@@ -1,7 +1,8 @@
 /**
  * Work Editor Screen
- * 
+ *
  * Create or edit partner/dealer work portfolio items
+ * Dealer UI style
  */
 
 import React, { useState, useEffect } from 'react';
@@ -14,15 +15,15 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { useTheme } from '../../theme';
 import { useAuth } from '../../contexts/AuthContext';
 import { mobileBusinessService } from '../../services/businessService';
 import { Work } from '../../../shared/types/business.types';
 import { logger } from '../../core/logger';
-import { PrimaryButton } from '../../components/buttons/PrimaryButton';
 
 type WorkEditorRouteParams = {
   mode: 'create' | 'edit';
@@ -32,11 +33,10 @@ type WorkEditorRouteParams = {
 const WorkEditorScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<{ params: WorkEditorRouteParams }, 'params'>>();
-  const theme = useTheme();
   const { user } = useAuth();
-  
+
   const { mode, workId } = (route.params || { mode: 'create' }) as WorkEditorRouteParams;
-  
+
   const [loading, setLoading] = useState(mode === 'edit');
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -56,12 +56,12 @@ const WorkEditorScreen: React.FC = () => {
 
   const loadWork = async () => {
     if (!workId || !user?.id) return;
-    
+
     setLoading(true);
     try {
       const works = await mobileBusinessService.getWorks(user.id);
       const work = works.find(w => w.id === workId);
-      
+
       if (work) {
         setFormData({
           title: work.title || '',
@@ -124,7 +124,7 @@ const WorkEditorScreen: React.FC = () => {
         });
         Alert.alert('Success', 'Work updated successfully');
       }
-      
+
       navigation.goBack();
     } catch (error) {
       logger.error(`Failed to ${mode} work`, error as Error);
@@ -136,187 +136,170 @@ const WorkEditorScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   const categories = ['Residential', 'Commercial', 'Industrial', 'Infrastructure', 'Renovation', 'Other'];
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.form}>
-        {/* Title */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: theme.colors.text.secondary }]}>Title *</Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: theme.colors.card,
-                color: theme.colors.text.primary,
-                borderColor: theme.colors.border,
-              },
-            ]}
-            value={formData.title}
-            onChangeText={(text) => setFormData((prev) => ({ ...prev, title: text }))}
-            placeholder="Enter work title"
-            placeholderTextColor={theme.colors.text.secondary}
-          />
-        </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-        {/* Category */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: theme.colors.text.secondary }]}>Category *</Text>
-          <View style={styles.categoryContainer}>
-            {categories.map((cat) => (
-              <TouchableOpacity
-                key={cat}
-                style={[
-                  styles.categoryButton,
-                  {
-                    backgroundColor:
-                      formData.category === cat ? theme.colors.primary : theme.colors.card,
-                    borderColor: theme.colors.border,
-                  },
-                ]}
-                onPress={() => setFormData((prev) => ({ ...prev, category: cat }))}
-              >
-                <Text
-                  style={{
-                    color: formData.category === cat ? '#FFFFFF' : theme.colors.text.primary,
-                    fontSize: 14,
-                    fontWeight: '500',
-                  }}
-                >
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.form}>
+          {/* Title */}
+          <View style={styles.field}>
+            <Text style={styles.label}>Title *</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.title}
+              onChangeText={(text) => setFormData((prev) => ({ ...prev, title: text }))}
+              placeholder="Enter work title"
+              placeholderTextColor="#999"
+            />
           </View>
-        </View>
 
-        {/* Description */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: theme.colors.text.secondary }]}>Description</Text>
-          <TextInput
-            style={[
-              styles.textArea,
-              {
-                backgroundColor: theme.colors.card,
-                color: theme.colors.text.primary,
-                borderColor: theme.colors.border,
-              },
-            ]}
-            value={formData.description}
-            onChangeText={(text) => setFormData((prev) => ({ ...prev, description: text }))}
-            placeholder="Enter work description"
-            placeholderTextColor={theme.colors.text.secondary}
-            multiline
-            numberOfLines={6}
-            textAlignVertical="top"
-          />
-        </View>
+          {/* Category */}
+          <View style={styles.field}>
+            <Text style={styles.label}>Category *</Text>
+            <View style={styles.categoryContainer}>
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[
+                    styles.categoryButton,
+                    formData.category === cat && styles.categoryButtonActive,
+                  ]}
+                  onPress={() => setFormData((prev) => ({ ...prev, category: cat }))}
+                >
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      formData.category === cat && styles.categoryTextActive,
+                    ]}
+                  >
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
-        {/* Location */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: theme.colors.text.secondary }]}>Location</Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: theme.colors.card,
-                color: theme.colors.text.primary,
-                borderColor: theme.colors.border,
-              },
-            ]}
-            value={formData.location}
-            onChangeText={(text) => setFormData((prev) => ({ ...prev, location: text }))}
-            placeholder="Enter location (optional)"
-            placeholderTextColor={theme.colors.text.secondary}
-          />
-        </View>
+          {/* Description */}
+          <View style={styles.field}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={styles.textArea}
+              value={formData.description}
+              onChangeText={(text) => setFormData((prev) => ({ ...prev, description: text }))}
+              placeholder="Enter work description"
+              placeholderTextColor="#999"
+              multiline
+              numberOfLines={6}
+              textAlignVertical="top"
+            />
+          </View>
 
-        {/* Images - Placeholder for now */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: theme.colors.text.secondary }]}>Images</Text>
+          {/* Location */}
+          <View style={styles.field}>
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.location}
+              onChangeText={(text) => setFormData((prev) => ({ ...prev, location: text }))}
+              placeholder="Enter location (optional)"
+              placeholderTextColor="#999"
+            />
+          </View>
+
+          {/* Images */}
+          <View style={styles.field}>
+            <Text style={styles.label}>Images</Text>
+            <TouchableOpacity
+              style={styles.imageButton}
+              onPress={() => {
+                Alert.alert('Info', 'Image upload functionality will be implemented later');
+              }}
+            >
+              <Text style={styles.imageButtonText}>
+                {formData.images.length > 0 ? `${formData.images.length} images` : '+ Add Images'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Save Button */}
           <TouchableOpacity
-            style={[
-              styles.imageButton,
-              {
-                backgroundColor: theme.colors.card,
-                borderColor: theme.colors.border,
-              },
-            ]}
-            onPress={() => {
-              Alert.alert('Info', 'Image upload functionality will be implemented later');
-            }}
-          >
-            <Text style={{ color: theme.colors.text.secondary }}>
-              {formData.images.length > 0 ? `${formData.images.length} images` : '+ Add Images'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Save Button */}
-        <View style={styles.actions}>
-          <PrimaryButton
-            title={saving ? 'Saving...' : mode === 'create' ? 'Create Work' : 'Update Work'}
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={handleSave}
             disabled={saving}
-            fullWidth
-          />
+          >
+            <Text style={styles.saveButtonText}>
+              {saving ? 'Saving...' : mode === 'create' ? 'Create Work' : 'Update Work'}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => navigation.goBack()}
             disabled={saving}
           >
-            <Text style={{ color: theme.colors.text.secondary, textAlign: 'center', marginTop: 12 }}>
-              Cancel
-            </Text>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  content: {
+    flex: 1,
+  },
   form: {
     padding: 16,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#666',
     marginBottom: 8,
   },
   input: {
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
-    ...(Platform.OS === 'android' && { elevation: 0 }),
+    color: '#1A1A1A',
   },
   textArea: {
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
+    color: '#1A1A1A',
     minHeight: 120,
     textAlignVertical: 'top',
-    ...(Platform.OS === 'android' && { elevation: 0 }),
   },
   categoryContainer: {
     flexDirection: 'row',
@@ -327,24 +310,58 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    ...(Platform.OS === 'android' && { elevation: 0 }),
+    backgroundColor: '#FFFFFF',
+  },
+  categoryButtonActive: {
+    backgroundColor: '#FF6B35',
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1A1A1A',
+  },
+  categoryTextActive: {
+    color: '#FFFFFF',
   },
   imageButton: {
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-    ...(Platform.OS === 'android' && { elevation: 0 }),
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderStyle: 'dashed',
   },
-  actions: {
-    marginTop: 24,
-    marginBottom: 32,
+  imageButtonText: {
+    fontSize: 14,
+    color: '#999',
+  },
+  saveButton: {
+    backgroundColor: '#333',
+    paddingVertical: 16,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   cancelButton: {
-    marginTop: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  cancelButtonText: {
+    fontSize: 15,
+    color: '#999',
+  },
+  bottomPadding: {
+    height: Platform.OS === 'ios' ? 40 : 30,
   },
 });
 
 export default WorkEditorScreen;
-

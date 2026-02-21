@@ -1,7 +1,7 @@
 /**
  * Profile Screen (Partner/Dealer Mobile)
- * 
- * Profile management and settings
+ *
+ * Profile management and settings - dealer UI style
  */
 
 import React from 'react';
@@ -11,158 +11,295 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  Platform,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../../theme';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { UserRole } from '../../types/auth.types';
 import { logger } from '../../core/logger';
+
+interface MenuItem {
+  id: string;
+  title: string;
+  icon: string;
+  screen: string;
+}
+
+const partnerMenuItems: MenuItem[] = [
+  { id: 'account',    title: 'Account Management', icon: 'manage-accounts', screen: 'AccountManagement' },
+  { id: 'payments',   title: 'Payment History',    icon: 'receipt-long',    screen: 'PaymentHistory' },
+  { id: 'projects',   title: 'My Projects',        icon: 'construction',    screen: 'Projects' },
+  { id: 'utilities',  title: 'Tools & Utilities',  icon: 'calculate',       screen: 'UtilitiesHome' },
+  { id: 'password',   title: 'Reset Password',     icon: 'lock-reset',      screen: 'ForgotPassword' },
+];
+
+const dealerMenuItems: MenuItem[] = [
+  { id: 'account',    title: 'Account Management', icon: 'manage-accounts', screen: 'AccountManagement' },
+  { id: 'payments',   title: 'Payment History',    icon: 'receipt-long',    screen: 'PaymentHistory' },
+  { id: 'loyalty',    title: 'Loyalty Points',     icon: 'star',            screen: 'LoyaltyPoints' },
+  { id: 'referrals',  title: 'Referrals',          icon: 'people',          screen: 'Referrals' },
+  { id: 'password',   title: 'Reset Password',     icon: 'lock-reset',      screen: 'ForgotPassword' },
+];
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const theme = useTheme();
   const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
+  const isDealer = user?.role === UserRole.DEALER;
+  const menuItems = isDealer ? dealerMenuItems : partnerMenuItems;
+
+  const performLogout = async () => {
     try {
       await logout();
     } catch (error) {
       logger.error('Failed to logout', error as Error);
-      Alert.alert('Error', 'Failed to logout. Please try again.');
+      await logout().catch(() => {});
     }
   };
 
-  // Menu items - only include screens that exist in navigation
-  // TODO: Add missing screens: ProfileEditor, Enquiries, Feedbacks, Gallery, Notes, Referrals, LoyaltyPoints, Reports, Chat, Settings
-  const menuItems = [
-    // { id: 'profile', title: 'Edit Profile', screen: 'ProfileEditor' },
-    // { id: 'enquiries', title: 'Enquiries', screen: 'Enquiries' },
-    // { id: 'feedbacks', title: 'Feedbacks', screen: 'Feedbacks' },
-    // { id: 'gallery', title: 'Gallery', screen: 'Gallery' },
-    // { id: 'notes', title: 'Notes', screen: 'Notes' },
-    // { id: 'referrals', title: 'Referrals', screen: 'Referrals' },
-    // { id: 'loyalty', title: 'Loyalty Points', screen: 'LoyaltyPoints' },
-    // { id: 'reports', title: 'Reports & Statistics', screen: 'Reports' },
-    // { id: 'chat', title: 'Chat', screen: 'Chat' },
-    // { id: 'settings', title: 'Settings', screen: 'Settings' },
-    // Temporary: Navigate to existing screens or placeholder
-    { id: 'account', title: 'Account Management', screen: 'AccountManagement' },
-    { id: 'utilities', title: 'Utilities & Knowledge', screen: 'UtilitiesHome' },
-  ];
+  const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to logout?')) {
+        performLogout();
+      }
+    } else {
+      Alert.alert(
+        'Logout',
+        'Are you sure you want to logout?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Logout', style: 'destructive', onPress: performLogout },
+        ]
+      );
+    }
+  };
+
+  const handleMenuPress = (item: MenuItem) => {
+    try {
+      navigation.navigate(item.screen as never);
+    } catch (error) {
+      logger.error(`Failed to navigate to ${item.screen}`, error as Error);
+      Alert.alert('Coming Soon', `${item.title} is not available yet.`, [{ text: 'OK' }]);
+    }
+  };
+
+  const roleLabel = isDealer ? 'Dealer' : 'Partner';
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+      {/* Header */}
       <View style={styles.header}>
-        <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
-          <Text style={styles.avatarText}>{user?.name?.charAt(0).toUpperCase() || 'U'}</Text>
+        <Text style={styles.headerTitle}>Profile</Text>
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+
+        {/* Profile Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            </Text>
+          </View>
+          <Text style={styles.userName}>{user?.name || 'User'}</Text>
+          <Text style={styles.userRole}>{roleLabel}</Text>
+          {user?.email ? <Text style={styles.userDetail}>{user.email}</Text> : null}
+          {user?.phone ? <Text style={styles.userDetail}>{user.phone}</Text> : null}
         </View>
-        <Text style={[styles.name, { color: theme.colors.text.primary }]}>{user?.name}</Text>
-        <Text style={[styles.role, { color: theme.colors.text.secondary }]}>
-          {user?.role?.replace('_', ' ')}
-        </Text>
-      </View>
 
-      <View style={styles.menuSection}>
-        {menuItems.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={[styles.menuItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-            onPress={() => {
-              try {
-                // Check if screen exists before navigating
-                navigation.navigate(item.screen as never);
-              } catch (error: any) {
-                // Handle navigation errors gracefully
-                logger.error(`Failed to navigate to ${item.screen}`, error as Error);
-                Alert.alert(
-                  'Coming Soon',
-                  `${item.title} screen is not available yet. It will be added in a future update.`,
-                  [{ text: 'OK' }]
-                );
-              }
-            }}
-          >
-            <Text style={[styles.menuText, { color: theme.colors.text.primary }]}>{item.title}</Text>
-            <Text style={{ color: theme.colors.text.secondary }}>→</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+        {/* Menu Items */}
+        <View style={styles.menuSection}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={item.id}
+              style={[
+                styles.menuItem,
+                index === menuItems.length - 1 && styles.menuItemLast,
+              ]}
+              onPress={() => handleMenuPress(item)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuItemLeft}>
+                <View style={styles.menuIconContainer}>
+                  <MaterialIcons name={item.icon as any} size={20} color="#FF6B35" />
+                </View>
+                <Text style={styles.menuText}>{item.title}</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color="#BBBBBB" />
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {/* Logout Button */}
-      <TouchableOpacity
-        style={[styles.logoutButton, { backgroundColor: '#FF3B30' }]}
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Logout */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+          <View style={styles.logoutInner}>
+            <MaterialIcons name="logout" size={20} color="#E53935" />
+            <Text style={styles.logoutText}>Logout</Text>
+          </View>
+        </TouchableOpacity>
+
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 32,
-    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  avatar: {
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  content: {
+    flex: 1,
+  },
+  profileCard: {
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+    paddingVertical: 28,
+    paddingHorizontal: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.07,
+        shadowRadius: 6,
+      },
+      android: { elevation: 3 },
+    }),
+  },
+  avatarContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    justifyContent: 'center',
+    backgroundColor: '#FF6B35',
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'center',
+    marginBottom: 14,
   },
   avatarText: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  userName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
     marginBottom: 4,
   },
-  role: {
-    fontSize: 16,
+  userRole: {
+    fontSize: 13,
+    color: '#FF6B35',
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  userDetail: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 2,
   },
   menuSection: {
-    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 5,
+      },
+      android: { elevation: 2 },
+    }),
   },
   menuItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 12,
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  menuItemLast: {
+    borderBottomWidth: 0,
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#FFF5F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
   },
   menuText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
+    color: '#1A1A1A',
   },
   logoutButton: {
-    borderRadius: 8,
-    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 5,
+      },
+      android: { elevation: 2 },
+    }),
+  },
+  logoutInner: {
+    flexDirection: 'row',
     alignItems: 'center',
-    margin: 16,
-    marginTop: 8,
+    justifyContent: 'center',
+    paddingVertical: 15,
   },
   logoutText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
+    color: '#E53935',
+    marginLeft: 8,
+  },
+  bottomPadding: {
+    height: Platform.OS === 'ios' ? 40 : 30,
   },
 });
 
 export default ProfileScreen;
-
-
-
-
-
-

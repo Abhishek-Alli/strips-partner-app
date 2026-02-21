@@ -74,7 +74,7 @@ const NotesMessagesScreen: React.FC = () => {
           {
             id: '1',
             title: 'Welcome Note',
-            content: 'Welcome to Shree Om! We are here to help you with your construction needs.',
+            content: 'Welcome to SRJ! We are here to help you with your construction needs.',
             createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
             isRead: false
           },

@@ -16,13 +16,15 @@ import ordersRoutes from './orders.routes.js';
 import profilesRoutes from './profiles.routes.js';
 import uploadRoutes from './upload.routes.js';
 import partnerRoutes from './partner.routes.js';
+import locationRoutes from './location.routes.js';
+import chatRoutes from './chat.routes.js';
 
 const router = express.Router();
 
 // Root API route - provide API information
 router.get('/', (req, res) => {
   res.json({
-    message: 'Shree Om API',
+    message: 'SRJ API',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
@@ -62,7 +64,9 @@ router.use('/search', searchRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/upload', uploadRoutes);
-router.use('/partner', partnerRoutes);
+router.use('/partner',  partnerRoutes);
+router.use('/location', locationRoutes);
+router.use('/chat',     chatRoutes);
 
 export default router;
 

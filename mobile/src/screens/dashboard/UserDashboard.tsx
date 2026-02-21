@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { useDrawer } from '../../contexts/DrawerContext';
 import { logger } from '../../core/logger';
 
 interface ProfileItem {
@@ -135,11 +136,12 @@ const Section: React.FC<SectionProps> = ({ title, items, showDetails, onItemPres
 const UserDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigation = useNavigation();
+  const { openDrawer } = useDrawer();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = () => {
-    navigation.navigate('PartnerSearch' as never);
+    navigation.navigate('Search' as never);
   };
 
   const handleProfilePress = (item: ProfileItem) => {
@@ -148,12 +150,11 @@ const UserDashboard: React.FC = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Reload data here
     setTimeout(() => setRefreshing(false), 1000);
   };
 
   const handleMenuPress = () => {
-    // Open drawer or menu
+    openDrawer();
   };
 
   return (

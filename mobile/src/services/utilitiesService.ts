@@ -47,6 +47,19 @@ export interface UnitConverter {
   conversionFactor: number;
 }
 
+export interface ConverterUnit {
+  id: string;
+  name: string;
+  symbol: string;
+}
+
+export interface ConverterCategory {
+  id: string;
+  name: string;
+  icon: string;
+  units: ConverterUnit[];
+}
+
 class UtilitiesService {
   /**
    * Get checklists by category
@@ -120,22 +133,57 @@ class UtilitiesService {
   }
 
   /**
-   * Convert units
+   * Get converter categories (new API shape)
+   */
+  async getConverterCategories(): Promise<{ categories: ConverterCategory[] }> {
+    try {
+      if (apiClient.isMockMode()) {
+        return { categories: this.mockCategories };
+      }
+      return apiClient.get<{ categories: ConverterCategory[] }>('/utilities/converters');
+    } catch (error) {
+      logger.error('Failed to get converter categories', error as Error);
+      // Fallback to mock on error so the screen still works offline
+      return { categories: this.mockCategories };
+    }
+  }
+
+  /**
+   * Convert a value between units (new API shape)
+   */
+  async convertValue(
+    category: string,
+    fromUnit: string,
+    toUnit: string,
+    value: number,
+  ): Promise<{ result: number; formula: string }> {
+    try {
+      if (apiClient.isMockMode()) {
+        return this.mockConvert(category, fromUnit, toUnit, value);
+      }
+      return apiClient.post<{ result: number; formula: string }>('/utilities/convert', {
+        category,
+        fromUnit,
+        toUnit,
+        value,
+      });
+    } catch (error) {
+      logger.error('Failed to convert unit', error as Error);
+      return this.mockConvert(category, fromUnit, toUnit, value);
+    }
+  }
+
+  /**
+   * Convert units (legacy - kept for backward compat)
    */
   async convertUnit(value: number, converterId: string): Promise<{ result: number }> {
     try {
       if (apiClient.isMockMode()) {
         const converter = this.mockConverters.find(c => c.id === converterId);
-        if (!converter) {
-          throw new Error('Converter not found');
-        }
+        if (!converter) throw new Error('Converter not found');
         return { result: value * converter.conversionFactor };
       }
-
-      return apiClient.post<{ result: number }>('/utilities/convert', {
-        value,
-        converterId
-      });
+      return apiClient.post<{ result: number }>('/utilities/convert', { value, converterId });
     } catch (error) {
       logger.error('Failed to convert unit', error as Error);
       throw error;
@@ -143,19 +191,38 @@ class UtilitiesService {
   }
 
   /**
-   * Get unit converters
+   * Get unit converters (legacy)
    */
   async getUnitConverters(): Promise<{ converters: UnitConverter[] }> {
     try {
       if (apiClient.isMockMode()) {
         return { converters: this.mockConverters };
       }
-
       return apiClient.get<{ converters: UnitConverter[] }>('/utilities/converters');
     } catch (error) {
       logger.error('Failed to get converters', error as Error);
       throw error;
     }
+  }
+
+  /** Client-side mock conversion for offline fallback */
+  private mockConvert(
+    category: string,
+    fromUnit: string,
+    toUnit: string,
+    value: number,
+  ): { result: number; formula: string } {
+    const cat = this.mockCategories.find(c => c.id === category);
+    if (!cat) return { result: value, formula: '' };
+    const from = (cat as any)._units?.find((u: any) => u.id === fromUnit);
+    const to   = (cat as any)._units?.find((u: any) => u.id === toUnit);
+    if (!from || !to) return { result: value, formula: '' };
+    const result = value * from.toBase / to.toBase;
+    const factor = from.toBase / to.toBase;
+    return {
+      result: Math.round(result * 1000000) / 1000000,
+      formula: `1 ${from.symbol} = ${Math.round(factor * 1000000) / 1000000} ${to.symbol}`,
+    };
   }
 
   /**
@@ -179,7 +246,40 @@ class UtilitiesService {
     }
   }
 
-  // Mock data
+  // Mock categories (mirrors backend converter.service.js)
+  private mockCategories: ConverterCategory[] = [
+    { id: 'length',      name: 'Length',      icon: '📏', units: [
+      { id: 'mm', name: 'Millimeter', symbol: 'mm' }, { id: 'cm', name: 'Centimeter', symbol: 'cm' },
+      { id: 'm',  name: 'Meter',      symbol: 'm'  }, { id: 'km', name: 'Kilometer',  symbol: 'km' },
+      { id: 'in', name: 'Inch',       symbol: 'in' }, { id: 'ft', name: 'Feet',       symbol: 'ft' },
+      { id: 'yd', name: 'Yard',       symbol: 'yd' }, { id: 'mi', name: 'Mile',       symbol: 'mi' },
+    ]},
+    { id: 'area',        name: 'Area',        icon: '⬛', units: [
+      { id: 'sqm',     name: 'Sq Meter',    symbol: 'm²'    }, { id: 'sqft',    name: 'Sq Feet',     symbol: 'ft²'   },
+      { id: 'sqyd',    name: 'Sq Yard',     symbol: 'yd²'   }, { id: 'acre',    name: 'Acre',        symbol: 'ac'    },
+      { id: 'hectare', name: 'Hectare',     symbol: 'ha'    }, { id: 'gunta',   name: 'Gunta',       symbol: 'gunta' },
+      { id: 'cent',    name: 'Cent',        symbol: 'cent'  }, { id: 'bigha',   name: 'Bigha',       symbol: 'bigha' },
+      { id: 'marla',   name: 'Marla',       symbol: 'marla' },
+    ]},
+    { id: 'weight',      name: 'Weight',      icon: '⚖️', units: [
+      { id: 'mg',      name: 'Milligram', symbol: 'mg'  }, { id: 'g',       name: 'Gram',     symbol: 'g'   },
+      { id: 'kg',      name: 'Kilogram',  symbol: 'kg'  }, { id: 'tonne',   name: 'Tonne',    symbol: 't'   },
+      { id: 'lb',      name: 'Pound',     symbol: 'lb'  }, { id: 'oz',      name: 'Ounce',    symbol: 'oz'  },
+      { id: 'quintal', name: 'Quintal',   symbol: 'qtl' },
+    ]},
+    { id: 'volume',      name: 'Volume',      icon: '🧊', units: [
+      { id: 'ml',  name: 'Milliliter',  symbol: 'ml'  }, { id: 'l',   name: 'Liter',       symbol: 'L'   },
+      { id: 'cum', name: 'Cubic Meter', symbol: 'm³'  }, { id: 'cft', name: 'Cubic Feet',   symbol: 'ft³' },
+      { id: 'gal', name: 'Gallon (US)', symbol: 'gal' },
+    ]},
+    { id: 'temperature', name: 'Temperature', icon: '🌡️', units: [
+      { id: 'c', name: 'Celsius',    symbol: '°C' },
+      { id: 'f', name: 'Fahrenheit', symbol: '°F' },
+      { id: 'k', name: 'Kelvin',     symbol: 'K'  },
+    ]},
+  ] as any;
+
+  // Mock data (legacy)
   private mockConverters: UnitConverter[] = [
     { id: 'length_m_ft', name: 'Meters to Feet', category: 'Length', fromUnit: 'm', toUnit: 'ft', conversionFactor: 3.28084 },
     { id: 'length_ft_m', name: 'Feet to Meters', category: 'Length', fromUnit: 'ft', toUnit: 'm', conversionFactor: 0.3048 },

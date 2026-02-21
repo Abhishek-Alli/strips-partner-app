@@ -1,7 +1,7 @@
 /**
  * Projects Screen
- * 
- * Display upcoming construction projects
+ *
+ * Display upcoming construction projects - dealer UI style
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,17 +13,17 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../../theme';
 import { mobileBusinessService } from '../../services/businessService';
 import { Project } from '../../../shared/types/business.types';
 import { logger } from '../../core/logger';
 
 const ProjectsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const theme = useTheme();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,21 +52,21 @@ const ProjectsScreen: React.FC = () => {
   };
 
   const renderProjectItem = ({ item }: { item: Project }) => (
-    <TouchableOpacity
-      style={[styles.projectCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-    >
-      <Text style={[styles.projectTitle, { color: theme.colors.text.primary }]}>{item.title || 'Untitled Project'}</Text>
+    <TouchableOpacity style={styles.projectCard}>
+      <Text style={styles.projectTitle}>{item.title || 'Untitled Project'}</Text>
       {item.description && (
-        <Text style={[styles.projectDescription, { color: theme.colors.text.secondary }]} numberOfLines={2}>
+        <Text style={styles.projectDescription} numberOfLines={2}>
           {item.description}
         </Text>
       )}
       <View style={styles.projectMeta}>
         {item.status && (
-          <Text style={[styles.projectStatus, { color: theme.colors.primary }]}>{item.status}</Text>
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>{item.status}</Text>
+          </View>
         )}
         {item.startDate && (
-          <Text style={[styles.projectDate, { color: theme.colors.text.secondary }]}>
+          <Text style={styles.projectDate}>
             {new Date(item.startDate).toLocaleDateString()}
           </Text>
         )}
@@ -76,19 +76,21 @@ const ProjectsScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
       {projects.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
-            No projects available
-          </Text>
+          <Text style={styles.emptyText}>No projects available</Text>
         </View>
       ) : (
         <FlatList
@@ -100,18 +102,19 @@ const ProjectsScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
+              tintColor="#FF6B35"
             />
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
   },
   loadingContainer: {
     flex: 1,
@@ -122,40 +125,54 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   projectCard: {
-    borderRadius: 8,
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    ...(Platform.OS === 'android' && { elevation: 2 }),
-    ...(Platform.OS === 'ios' && {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
     }),
   },
   projectTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    marginBottom: 8,
+    color: '#1A1A1A',
+    marginBottom: 6,
   },
   projectDescription: {
-    fontSize: 14,
+    fontSize: 13,
+    color: '#666',
     marginBottom: 12,
-    lineHeight: 20,
+    lineHeight: 19,
   },
   projectMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  projectStatus: {
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: '#FFF5F2',
+    borderRadius: 12,
+  },
+  statusText: {
     fontSize: 12,
     fontWeight: '600',
+    color: '#FF6B35',
     textTransform: 'uppercase',
   },
   projectDate: {
     fontSize: 12,
+    color: '#999',
   },
   emptyContainer: {
     flex: 1,
@@ -164,10 +181,10 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 15,
+    color: '#999',
     textAlign: 'center',
   },
 });
 
 export default ProjectsScreen;
-

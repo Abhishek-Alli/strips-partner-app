@@ -160,7 +160,7 @@ const DealerHomeScreen: React.FC = () => {
               </View>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.businessName}>Serines Deals and Traders</Text>
+              <Text style={styles.businessName}>SRJ</Text>
               <Text style={styles.profileDetail}>📍 Location: Ganeshguri</Text>
               <Text style={styles.profileDetail}>Contact information: 9123456780</Text>
               <Text style={styles.profileDetailSmall}>5 km away</Text>

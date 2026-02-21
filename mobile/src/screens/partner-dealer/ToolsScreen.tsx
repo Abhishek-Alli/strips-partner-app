@@ -1,7 +1,8 @@
 /**
  * Tools Screen (Partner/Dealer Mobile)
- * 
+ *
  * Access to utilities, calculators, quizzes, etc.
+ * Dealer UI style
  */
 
 import React from 'react';
@@ -11,10 +12,12 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  Platform,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../../theme';
 import { logger } from '../../core/logger';
 
 interface Tool {
@@ -27,7 +30,6 @@ interface Tool {
 
 const ToolsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const theme = useTheme();
 
   const tools: Tool[] = [
     { id: 'checklists', title: 'Checklists', icon: '✓', screen: 'Checklists', implemented: true },
@@ -41,94 +43,128 @@ const ToolsScreen: React.FC = () => {
     { id: 'trading', title: 'Trading Advices', icon: '📈', screen: null, implemented: false },
     { id: 'projects', title: 'Upcoming Projects', icon: '🏗️', screen: 'Projects', implemented: true },
     { id: 'tenders', title: 'Tenders', icon: '📋', screen: null, implemented: false },
-    { id: 'steel', title: 'Steel Market Updates', icon: '⚙️', screen: 'Feed', implemented: true }, // FeedScreen shows steel market updates
+    { id: 'steel', title: 'Steel Market Updates', icon: '⚙️', screen: 'Feed', implemented: true },
   ];
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.colors.text.primary }]}>Tools</Text>
+        <Text style={styles.headerTitle}>Tools</Text>
       </View>
 
-      <View style={styles.toolsGrid}>
-        {tools.map((tool) => (
-          <TouchableOpacity
-            key={tool.id}
-            style={[styles.toolCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-            onPress={() => {
-              if (!tool.implemented || !tool.screen) {
-                Alert.alert('Coming Soon', `${tool.title} feature is coming soon!`);
-                return;
-              }
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.toolsGrid}>
+          {tools.map((tool) => (
+            <TouchableOpacity
+              key={tool.id}
+              style={styles.toolCard}
+              onPress={() => {
+                if (!tool.implemented || !tool.screen) {
+                  Alert.alert('Coming Soon', `${tool.title} feature is coming soon!`);
+                  return;
+                }
 
-              try {
-                navigation.navigate(tool.screen as never);
-              } catch (error) {
-                logger.error(`Failed to navigate to ${tool.screen}`, error as Error);
-                Alert.alert('Navigation Error', `Could not navigate to ${tool.title}. Please try again.`);
-              }
-            }}
-          >
-            <Text style={styles.toolIcon}>{tool.icon}</Text>
-            <Text style={[styles.toolTitle, { color: theme.colors.text.primary }]}>{tool.title}</Text>
-            {!tool.implemented && (
-              <Text style={[styles.comingSoon, { color: theme.colors.text.secondary }]}>Coming Soon</Text>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+                try {
+                  navigation.navigate(tool.screen as never);
+                } catch (error) {
+                  logger.error(`Failed to navigate to ${tool.screen}`, error as Error);
+                  Alert.alert('Navigation Error', `Could not navigate to ${tool.title}. Please try again.`);
+                }
+              }}
+            >
+              <Text style={styles.toolIcon}>{tool.icon}</Text>
+              <Text style={styles.toolTitle}>{tool.title}</Text>
+              {!tool.implemented && (
+                <View style={styles.comingSoonBadge}>
+                  <Text style={styles.comingSoonText}>Coming Soon</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
   },
   header: {
-    padding: 16,
-    paddingTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  content: {
+    flex: 1,
   },
   toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 16,
-    gap: 12,
+    padding: 12,
+    gap: 10,
   },
   toolCard: {
     width: '47%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 20,
-    borderRadius: 8,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 120,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   toolIcon: {
-    fontSize: 40,
-    marginBottom: 8,
+    fontSize: 36,
+    marginBottom: 10,
   },
   toolTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+    color: '#1A1A1A',
     textAlign: 'center',
   },
-  comingSoon: {
+  comingSoonBadge: {
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#FFF5F2',
+    borderRadius: 10,
+  },
+  comingSoonText: {
     fontSize: 10,
-    marginTop: 4,
-    textAlign: 'center',
-    fontStyle: 'italic',
+    color: '#FF6B35',
+    fontWeight: '500',
+  },
+  bottomPadding: {
+    height: Platform.OS === 'ios' ? 40 : 30,
   },
 });
 
 export default ToolsScreen;
-
-
-
-
-
-

@@ -40,4 +40,8 @@ router.post('/otp/verify', verifyOTPLogin);
 // Current user
 router.get('/me', authenticate, getCurrentUser);
 
+// Social login (Google / Facebook)
+import socialAuthRoutes from './socialAuth.routes.js';
+router.use('/social', socialAuthRoutes);
+
 export default router;

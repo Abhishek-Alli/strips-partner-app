@@ -1,7 +1,5 @@
 /**
- * Payment History Screen
- * 
- * Mobile screen for viewing payment history
+ * Payment History Screen - modern dealer UI style (#FF6B35)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -13,17 +11,29 @@ import {
   TouchableOpacity,
   RefreshControl,
   Platform,
-  Alert
+  Alert,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
-import { useTheme } from '../../theme';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { mobilePaymentService } from '../../services/paymentService';
 import { PaymentIntent, PaymentStatus, PaymentService } from '../../../shared/core/payments/paymentTypes';
 import { formatAmount, getServicePricing } from '../../../shared/core/payments/paymentConstants';
 import { logger } from '../../core/logger';
 
+const ACCENT = '#FF6B35';
+const BG = '#F5F5F5';
+const CARD = '#FFFFFF';
+
+const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: string }> = {
+  [PaymentStatus.SUCCESS]: { color: '#4CAF50', bg: '#E8F5E9', icon: 'check-circle' },
+  [PaymentStatus.FAILED]: { color: '#F44336', bg: '#FFEBEE', icon: 'cancel' },
+  [PaymentStatus.PENDING]: { color: '#FF9800', bg: '#FFF3E0', icon: 'schedule' },
+  [PaymentStatus.REFUNDED]: { color: '#9E9E9E', bg: '#F5F5F5', icon: 'refresh' },
+};
+
 const PaymentHistoryScreen: React.FC = () => {
-  const theme = useTheme();
   const { user } = useAuth();
   const [payments, setPayments] = useState<PaymentIntent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,10 +46,7 @@ const PaymentHistoryScreen: React.FC = () => {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const response = await mobilePaymentService.getPaymentHistory({
-        userId: user?.id,
-        limit: 50
-      });
+      const response = await mobilePaymentService.getPaymentHistory({ userId: user?.id, limit: 50 });
       setPayments(response.payments);
     } catch (error) {
       logger.error('Failed to load payment history', error as Error);
@@ -58,92 +65,102 @@ const PaymentHistoryScreen: React.FC = () => {
   const handleViewReceipt = async (paymentIntent: PaymentIntent) => {
     try {
       const receipt = await mobilePaymentService.getPaymentReceipt(paymentIntent.id);
-      Alert.alert('Receipt', `Receipt Number: ${receipt.invoiceNumber}\n\nIn production, this would download the receipt.`);
+      Alert.alert(`Receipt`, `Receipt Number: ${receipt.invoiceNumber}\n\nIn production, this would download the receipt.`);
     } catch (error) {
       logger.error('Failed to get receipt', error as Error);
       Alert.alert('Error', 'Failed to load receipt');
     }
   };
 
-  const getStatusColor = (status: PaymentStatus): string => {
-    switch (status) {
-      case PaymentStatus.SUCCESS:
-        return '#4CAF50';
-      case PaymentStatus.FAILED:
-        return '#F44336';
-      case PaymentStatus.PENDING:
-        return '#FF9800';
-      case PaymentStatus.REFUNDED:
-        return '#9E9E9E';
-      default:
-        return theme.colors.text.secondary;
-    }
-  };
+  const getServiceName = (service: PaymentService): string => getServicePricing(service).name;
 
-  const getServiceName = (service: PaymentService): string => {
-    return getServicePricing(service).name;
-  };
-
-  const formatDate = (date: Date): string => {
-    return new Date(date).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const formatDate = (date: Date): string =>
+    new Date(date).toLocaleDateString('en-IN', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
-  };
 
-  const renderPayment = ({ item }: { item: PaymentIntent }) => (
-    <TouchableOpacity
-      style={[styles.paymentCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-      onPress={() => item.status === PaymentStatus.SUCCESS && handleViewReceipt(item)}
-    >
-      <View style={styles.paymentHeader}>
-        <View style={styles.paymentInfo}>
-          <Text style={[styles.serviceName, { color: theme.colors.text.primary }]}>
-            {getServiceName(item.service)}
-          </Text>
-          <Text style={[styles.date, { color: theme.colors.text.secondary }]}>
-            {formatDate(item.createdAt)}
-          </Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-          <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-            {item.status.toUpperCase()}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.paymentFooter}>
-        <Text style={[styles.amount, { color: theme.colors.text.primary }]}>
-          {formatAmount(item.amount, item.currency)}
-        </Text>
-        {item.status === PaymentStatus.SUCCESS && (
-          <TouchableOpacity onPress={() => handleViewReceipt(item)}>
-            <Text style={[styles.receiptLink, { color: theme.colors.primary }]}>
-              View Receipt
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+  const getTotalAmount = () =>
+    payments
+      .filter(p => p.status === PaymentStatus.SUCCESS)
+      .reduce((sum, p) => sum + p.amount, 0);
 
-  if (loading && payments.length === 0) {
+  const renderPayment = ({ item }: { item: PaymentIntent }) => {
+    const cfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG[PaymentStatus.PENDING];
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Text style={{ color: theme.colors.text.secondary }}>Loading payment history...</Text>
-      </View>
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.7}
+        onPress={() => item.status === PaymentStatus.SUCCESS && handleViewReceipt(item)}
+      >
+        {/* Left accent bar */}
+        <View style={[styles.cardAccent, { backgroundColor: cfg.color }]} />
+
+        <View style={styles.cardInner}>
+          <View style={styles.cardTop}>
+            {/* Service icon */}
+            <View style={[styles.serviceIcon, { backgroundColor: cfg.bg }]}>
+              <MaterialIcons name={cfg.icon as any} size={22} color={cfg.color} />
+            </View>
+
+            <View style={styles.cardInfo}>
+              <Text style={styles.serviceName} numberOfLines={1}>
+                {getServiceName(item.service)}
+              </Text>
+              <Text style={styles.cardDate}>{formatDate(item.createdAt)}</Text>
+            </View>
+
+            <View style={[styles.statusPill, { backgroundColor: cfg.bg }]}>
+              <Text style={[styles.statusText, { color: cfg.color }]}>
+                {item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase()}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.cardBottom}>
+            <Text style={styles.amount}>{formatAmount(item.amount, item.currency)}</Text>
+            {item.status === PaymentStatus.SUCCESS && (
+              <TouchableOpacity
+                style={styles.receiptBtn}
+                onPress={() => handleViewReceipt(item)}
+              >
+                <MaterialIcons name="receipt" size={14} color={ACCENT} />
+                <Text style={styles.receiptText}>Receipt</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
     );
-  }
+  };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {payments.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
-            No payment history yet
-          </Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={CARD} />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Payment History</Text>
+        {payments.length > 0 && (
+          <View style={styles.totalBadge}>
+            <Text style={styles.totalLabel}>Total Paid</Text>
+            <Text style={styles.totalAmount}>{formatAmount(getTotalAmount(), 'INR')}</Text>
+          </View>
+        )}
+      </View>
+
+      {loading && payments.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <MaterialIcons name="payment" size={48} color="#DDD" />
+          <Text style={styles.loadingText}>Loading payment history...</Text>
+        </View>
+      ) : payments.length === 0 ? (
+        <View style={styles.empty}>
+          <View style={styles.emptyIconCircle}>
+            <MaterialIcons name="receipt-long" size={40} color={ACCENT} />
+          </View>
+          <Text style={styles.emptyTitle}>No payments yet</Text>
+          <Text style={styles.emptySubtitle}>Your payment history will appear here.</Text>
         </View>
       ) : (
         <FlatList
@@ -151,93 +168,89 @@ const PaymentHistoryScreen: React.FC = () => {
           renderItem={renderPayment}
           keyExtractor={item => item.id}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={theme.colors.primary}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={ACCENT} />
           }
           contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  listContent: {
-    padding: 16
-  },
-  paymentCard: {
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    ...(Platform.OS === 'android' && { elevation: 2 }),
-    ...(Platform.OS === 'ios' && {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2
-    })
-  },
-  paymentHeader: {
+  container: { flex: 1, backgroundColor: BG },
+  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12
-  },
-  paymentInfo: {
-    flex: 1
-  },
-  serviceName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4
-  },
-  date: {
-    fontSize: 12
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: '600'
-  },
-  paymentFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  amount: {
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  receiptLink: {
-    fontSize: 14,
-    fontWeight: '600'
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 32
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: CARD,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  emptyText: {
-    fontSize: 16
-  }
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
+  totalBadge: { alignItems: 'flex-end' },
+  totalLabel: { fontSize: 11, color: '#888' },
+  totalAmount: { fontSize: 15, fontWeight: '700', color: ACCENT },
+  listContent: { padding: 16 },
+  card: {
+    flexDirection: 'row',
+    backgroundColor: CARD,
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 4 },
+      android: { elevation: 2 },
+    }),
+  },
+  cardAccent: { width: 4 },
+  cardInner: { flex: 1, padding: 14 },
+  cardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  serviceIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  cardInfo: { flex: 1 },
+  serviceName: { fontSize: 14, fontWeight: '600', color: '#1A1A1A', marginBottom: 3 },
+  cardDate: { fontSize: 12, color: '#999' },
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: { fontSize: 11, fontWeight: '700' },
+  cardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  amount: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
+  receiptBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFF5F2',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  receiptText: { fontSize: 12, color: ACCENT, fontWeight: '600' },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  loadingText: { fontSize: 14, color: '#999' },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFF5F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#1A1A1A', marginBottom: 8 },
+  emptySubtitle: { fontSize: 14, color: '#888', textAlign: 'center' },
 });
 
 export default PaymentHistoryScreen;
-
-
-
-
-
-

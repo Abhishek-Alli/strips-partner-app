@@ -58,7 +58,7 @@ export const submitEnquiry = async (req, res) => {
           <p>We have received your enquiry and will get back to you soon.</p>
           <p><strong>Subject:</strong> ${subject}</p>
           <p><strong>Message:</strong> ${message}</p>
-          <p>Best regards,<br>Shree Om Team</p>
+          <p>Best regards,<br>SRJ Team</p>
         `
       });
     } catch (emailError) {

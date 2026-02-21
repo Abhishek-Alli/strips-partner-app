@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types/auth.types';
 import { useTheme } from '../theme';
 import { Icon } from '../components/core/Icon';
+import { IconName } from '../../../shared/icons/iconMap';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -23,7 +24,7 @@ import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 // Main Screens
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
-import NotificationsScreen from '../screens/notifications/NotificationsScreen';
+// NotificationsScreen removed from tabs (accessible via Profile stack)
 import NotificationsInboxScreen from '../screens/notifications/NotificationsInboxScreen';
 
 // Search Screens
@@ -59,7 +60,7 @@ import HomeScreen from '../screens/partner-dealer/HomeScreen';
 import WorksScreen from '../screens/partner-dealer/WorksScreen';
 import WorkEditorScreen from '../screens/partner-dealer/WorkEditorScreen';
 import FeedScreen from '../screens/partner-dealer/FeedScreen';
-import ToolsScreen from '../screens/partner-dealer/ToolsScreen';
+// ToolsScreen moved to profile/stack nav (not a bottom tab)
 import PartnerDealerProfileScreen from '../screens/partner-dealer/ProfileScreen';
 import ProjectsScreen from '../screens/partner-dealer/ProjectsScreen';
 
@@ -67,7 +68,7 @@ import ProjectsScreen from '../screens/partner-dealer/ProjectsScreen';
 import DealerHomeScreen from '../screens/dealer/DealerHomeScreen';
 import DealerProductsScreen from '../screens/dealer/DealerProductsScreen';
 import DealerEnquiriesScreen from '../screens/dealer/DealerEnquiriesScreen';
-import DealerToolsScreen from '../screens/dealer/DealerToolsScreen';
+// DealerToolsScreen accessible via drawer (not a bottom tab)
 import DealerProfileScreen from '../screens/dealer/DealerProfileScreen';
 import DealerDrawerContent from '../screens/dealer/DealerDrawerContent';
 import DealerDashboardScreen from '../screens/dealer/DealerDashboardScreen';
@@ -80,6 +81,7 @@ import DealerChecklistDetailScreen from '../screens/dealer/DealerChecklistDetail
 import DealerShortcutsLinksScreen from '../screens/dealer/DealerShortcutsLinksScreen';
 import OffersDiscountsScreen from '../screens/dealer/OffersDiscountsScreen';
 import DealerConverterScreen from '../screens/dealer/DealerConverterScreen';
+import DealerVaastuServicesScreen from '../screens/dealer/DealerVaastuServicesScreen';
 import DealerVideosScreen from '../screens/dealer/DealerVideosScreen';
 import DealerGalleryScreen from '../screens/dealer/DealerGalleryScreen';
 import DealerFeedbackScreen from '../screens/dealer/DealerFeedbackScreen';
@@ -96,15 +98,37 @@ import EducationPostsScreen from '../screens/dealer/EducationPostsScreen';
 import ReportsStatisticsScreen from '../screens/dealer/ReportsStatisticsScreen';
 import ApplyDealershipScreen from '../screens/dealer/ApplyDealershipScreen';
 
+// Chat Screens
+import ConversationListScreen from '../screens/chat/ConversationListScreen';
+import ChatScreen from '../screens/chat/ChatScreen';
+
+// Drawer Contents
+import GeneralUserDrawerContent from '../screens/general/GeneralUserDrawerContent';
+
 // Alias for ProfileScreen to avoid naming conflict
 const GeneralUserProfileScreen = ProfileScreen;
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+const tabBarStyle = (theme: ReturnType<typeof useTheme>) => ({
+  backgroundColor: theme.colors.card,
+  borderTopColor: theme.colors.border,
+  borderTopWidth: 1,
+  ...(Platform.OS === 'android' && { elevation: 8, height: 58 }),
+  ...(Platform.OS === 'ios' && { paddingBottom: 20, height: 72 }),
+});
+
 const GeneralUserTabs = () => {
   const theme = useTheme();
-  const colorScheme = useColorScheme();
+
+  const iconForTab: Record<string, IconName> = {
+    Home: 'home',
+    Search: 'search',
+    Tools: 'calculator',
+    Messages: 'chat',
+    Profile: 'profile',
+  };
 
   return (
     <Tab.Navigator
@@ -112,54 +136,42 @@ const GeneralUserTabs = () => {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.text.secondary,
-        tabBarStyle: {
-          backgroundColor: theme.colors.card,
-          borderTopColor: theme.colors.border,
-          borderTopWidth: 1,
-          ...(Platform.OS === 'android' && {
-            elevation: 8,
-          }),
-          ...(Platform.OS === 'ios' && {
-            paddingBottom: 20,
-            height: 88,
-          }),
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
-        tabBarIcon: ({ focused, color }) => {
-          let iconName: 'dashboard' | 'profile' | 'notifications' = 'dashboard';
-          
-          if (route.name === 'Dashboard') {
-            iconName = 'dashboard';
-          } else if (route.name === 'Profile') {
-            iconName = 'profile';
-          } else if (route.name === 'Notifications') {
-            iconName = 'notifications';
-          }
-
-          return (
-            <Icon
-              name={iconName}
-              size={24}
-              color={focused ? color : undefined}
-            />
-          );
-        },
+        tabBarStyle: tabBarStyle(theme),
+        tabBarShowLabel: false,
+        tabBarIcon: ({ focused, color, size }) => (
+          <Icon
+            name={(iconForTab[route.name] ?? 'home') as IconName}
+            size={26}
+            color={focused ? color : undefined}
+          />
+        ),
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Home" component={DashboardScreen} />
+      <Tab.Screen name="Search" component={PartnerSearchScreen} />
+      <Tab.Screen name="Tools" component={UtilitiesHomeScreen} />
+      <Tab.Screen name="Messages" component={ConversationListScreen} />
       <Tab.Screen name="Profile" component={GeneralUserProfileScreen} />
-      <Tab.Screen name="Notifications" component={NotificationsScreen} />
     </Tab.Navigator>
   );
 };
 
-const PartnerDealerTabs = () => {
+const GeneralUserWithDrawer = () => (
+  <DrawerProvider drawerContent={<GeneralUserDrawerContent />}>
+    <GeneralUserTabs />
+  </DrawerProvider>
+);
+
+const PartnerTabs = () => {
   const theme = useTheme();
-  const { user } = useAuth();
-  const isDealer = user?.role === UserRole.DEALER;
+
+  const iconForTab: Record<string, IconName> = {
+    Home: 'home',
+    Portfolio: 'work',
+    Explore: 'search',
+    Messages: 'chat',
+    Profile: 'profile',
+  };
 
   return (
     <Tab.Navigator
@@ -167,46 +179,59 @@ const PartnerDealerTabs = () => {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.text.secondary,
-        tabBarStyle: {
-          backgroundColor: theme.colors.card,
-          borderTopColor: theme.colors.border,
-          borderTopWidth: 1,
-          ...(Platform.OS === 'android' && {
-            elevation: 8,
-          }),
-          ...(Platform.OS === 'ios' && {
-            paddingBottom: 20,
-            height: 88,
-          }),
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
-        tabBarIcon: ({ focused, color }) => {
-          let iconName: 'home' | 'work' | 'event' | 'tools' | 'profile' = 'home';
-
-          if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'Work') iconName = 'work';
-          else if (route.name === 'Feed') iconName = 'event';
-          else if (route.name === 'Tools') iconName = 'tools';
-          else if (route.name === 'Profile') iconName = 'profile';
-
-          return (
-            <Icon
-              name={iconName}
-              size={24}
-              color={focused ? color : undefined}
-            />
-          );
-        },
+        tabBarStyle: tabBarStyle(theme),
+        tabBarShowLabel: false,
+        tabBarIcon: ({ focused, color }) => (
+          <Icon
+            name={(iconForTab[route.name] ?? 'home') as IconName}
+            size={26}
+            color={focused ? color : undefined}
+          />
+        ),
       })}
     >
-      <Tab.Screen name="Home" component={isDealer ? DealerHomeScreen : HomeScreen} />
-      <Tab.Screen name="Work" component={isDealer ? DealerProductsScreen : WorksScreen} />
-      <Tab.Screen name="Feed" component={isDealer ? DealerEnquiriesScreen : FeedScreen} />
-      <Tab.Screen name="Tools" component={isDealer ? DealerToolsScreen : ToolsScreen} />
-      <Tab.Screen name="Profile" component={isDealer ? DealerProfileScreen : PartnerDealerProfileScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Portfolio" component={WorksScreen} />
+      <Tab.Screen name="Explore" component={FeedScreen} />
+      <Tab.Screen name="Messages" component={ConversationListScreen} />
+      <Tab.Screen name="Profile" component={PartnerDealerProfileScreen} />
+    </Tab.Navigator>
+  );
+};
+
+const DealerTabs = () => {
+  const theme = useTheme();
+
+  const iconForTab: Record<string, IconName> = {
+    Home: 'home',
+    Products: 'product',
+    Enquiries: 'enquiry',
+    Messages: 'chat',
+    Profile: 'profile',
+  };
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.text.secondary,
+        tabBarStyle: tabBarStyle(theme),
+        tabBarShowLabel: false,
+        tabBarIcon: ({ focused, color }) => (
+          <Icon
+            name={(iconForTab[route.name] ?? 'home') as IconName}
+            size={26}
+            color={focused ? color : undefined}
+          />
+        ),
+      })}
+    >
+      <Tab.Screen name="Home" component={DealerHomeScreen} />
+      <Tab.Screen name="Products" component={DealerProductsScreen} />
+      <Tab.Screen name="Enquiries" component={DealerEnquiriesScreen} />
+      <Tab.Screen name="Messages" component={ConversationListScreen} />
+      <Tab.Screen name="Profile" component={DealerProfileScreen} />
     </Tab.Navigator>
   );
 };
@@ -214,7 +239,7 @@ const PartnerDealerTabs = () => {
 const DealerWithDrawer = () => {
   return (
     <DrawerProvider drawerContent={<DealerDrawerContent />}>
-      <PartnerDealerTabs />
+      <DealerTabs />
     </DrawerProvider>
   );
 };
@@ -307,7 +332,7 @@ const AppNavigator: React.FC = () => {
           </>
         ) : user?.role === UserRole.GENERAL_USER ? (
           <>
-            <Stack.Screen name="Main" component={GeneralUserTabs} />
+            <Stack.Screen name="Main" component={GeneralUserWithDrawer} />
             <Stack.Screen 
               name="PartnerSearch" 
               component={PartnerSearchScreen}
@@ -460,18 +485,28 @@ const AppNavigator: React.FC = () => {
                 title: 'Payment History',
               }}
             />
-            <Stack.Screen 
-              name="ForgotPassword" 
+            <Stack.Screen
+              name="ForgotPassword"
               component={ForgotPasswordScreen}
-              options={{ 
+              options={{
                 ...defaultHeaderOptions,
                 title: 'Reset Password',
               }}
             />
+            <Stack.Screen
+              name="ConversationList"
+              component={ConversationListScreen}
+              options={{ ...defaultHeaderOptions, title: 'Messages' }}
+            />
+            <Stack.Screen
+              name="Chat"
+              component={ChatScreen}
+              options={{ headerShown: false }}
+            />
           </>
         ) : user && (user.role === UserRole.PARTNER || user.role === UserRole.DEALER) ? (
           <>
-            <Stack.Screen name="Main" component={user.role === UserRole.DEALER ? DealerWithDrawer : PartnerDealerTabs} />
+            <Stack.Screen name="Main" component={user.role === UserRole.DEALER ? DealerWithDrawer : PartnerTabs} />
             {/* Partner/Dealer specific screens */}
             <Stack.Screen 
               name="AccountManagement" 
@@ -657,6 +692,11 @@ const AppNavigator: React.FC = () => {
               options={{ ...defaultHeaderOptions, title: 'Converter' }}
             />
             <Stack.Screen
+              name="DealerVaastuServices"
+              component={DealerVaastuServicesScreen}
+              options={{ ...defaultHeaderOptions, title: 'Vaastu Services' }}
+            />
+            <Stack.Screen
               name="DealerVideos"
               component={DealerVideosScreen}
               options={{ ...defaultHeaderOptions, title: 'Videos' }}
@@ -730,6 +770,16 @@ const AppNavigator: React.FC = () => {
               name="ApplyDealership"
               component={ApplyDealershipScreen}
               options={{ ...defaultHeaderOptions, title: 'Apply for Dealership' }}
+            />
+            <Stack.Screen
+              name="ConversationList"
+              component={ConversationListScreen}
+              options={{ ...defaultHeaderOptions, title: 'Messages' }}
+            />
+            <Stack.Screen
+              name="Chat"
+              component={ChatScreen}
+              options={{ headerShown: false }}
             />
           </>
         ) : isAuthenticated ? (

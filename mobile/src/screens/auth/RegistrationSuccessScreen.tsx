@@ -69,7 +69,7 @@ const RegistrationSuccessScreen: React.FC = () => {
       </Text>
 
       <Text style={[styles.description, { color: theme.colors.text.secondary }]}>
-        You can now access all features of the app. Welcome to Shree Om!
+        You can now access all features of the app. Welcome to SRJ!
       </Text>
 
       <PrimaryButton

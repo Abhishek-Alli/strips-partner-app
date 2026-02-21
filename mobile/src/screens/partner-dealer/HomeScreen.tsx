@@ -1,7 +1,8 @@
 /**
  * Home Screen (Partner/Dealer Mobile)
- * 
- * Dashboard with key metrics and quick actions
+ *
+ * Dashboard with profile summary, stats, and quick actions
+ * Styled to match dealer UI pattern
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,10 +14,12 @@ import {
   RefreshControl,
   TouchableOpacity,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
+  Platform,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../../theme';
 import { useAuth } from '../../contexts/AuthContext';
 import { mobileBusinessService } from '../../services/businessService';
 import { Statistics } from '../../../shared/types/business.types';
@@ -24,7 +27,6 @@ import { logger } from '../../core/logger';
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
-  const theme = useTheme();
   const { user } = useAuth();
   const defaultStats: Statistics = {
     totalWorks: 0,
@@ -49,18 +51,16 @@ const HomeScreen: React.FC = () => {
     if (user?.id) {
       loadStatistics();
     } else {
-      // If user is not loaded yet, show default stats and stop loading
       setStatistics(defaultStats);
       setLoading(false);
       setRefreshing(false);
     }
-    
-    // Safety timeout: always set loading to false after 10 seconds
+
     const safetyTimeout = setTimeout(() => {
       setLoading(false);
       setRefreshing(false);
     }, 10000);
-    
+
     return () => clearTimeout(safetyTimeout);
   }, [user?.id]);
 
@@ -71,26 +71,21 @@ const HomeScreen: React.FC = () => {
       setRefreshing(false);
       return;
     }
-    
-    // Set loading state only for initial load, not refresh
+
     if (!refreshing) {
       setLoading(true);
     }
-    
+
     try {
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
       const stats = await mobileBusinessService.getStatistics(user.id, startDate, endDate);
-      // Ensure we always have valid stats
       setStatistics(stats && typeof stats === 'object' ? stats : defaultStats);
     } catch (error) {
       logger.error('Failed to load statistics', error as Error);
-      // Set default statistics on error to prevent infinite loading
       setStatistics(defaultStats);
     } finally {
-      // Always set loading to false, even if there's an error
-      // This ensures we never get stuck in loading state
       setLoading(false);
       setRefreshing(false);
     }
@@ -101,120 +96,146 @@ const HomeScreen: React.FC = () => {
     loadStatistics();
   };
 
-  // Use statistics (always has a value due to defaultStats initialization)
   const stats = statistics;
 
-  // Show loading indicator only during initial load (not during refresh)
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
-    >
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.colors.text.primary }]}>Dashboard</Text>
-        <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
-          Welcome back, {user?.name}
-        </Text>
+        <Text style={styles.headerTitle}>Dashboard</Text>
       </View>
 
-      {/* Quick Stats */}
-      <View style={styles.statsGrid}>
-        <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.statValue, { color: theme.colors.primary }]}>{stats.totalWorks}</Text>
-          <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Works</Text>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FF6B35" />}
+      >
+        {/* Welcome */}
+        <View style={styles.welcomeCard}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>{user?.name?.charAt(0).toUpperCase() || 'P'}</Text>
+          </View>
+          <View style={styles.welcomeInfo}>
+            <Text style={styles.welcomeName}>Welcome back, {user?.name || 'Partner'}</Text>
+            <Text style={styles.welcomeRole}>{user?.role?.replace('_', ' ') || 'Partner'}</Text>
+          </View>
         </View>
-        <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.statValue, { color: theme.colors.primary }]}>{stats.totalEnquiries}</Text>
-          <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Enquiries</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.statValue, { color: theme.colors.primary }]}>{stats.averageRating.toFixed(1)}</Text>
-          <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Rating</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.statValue, { color: theme.colors.primary }]}>{stats.totalLoyaltyPoints}</Text>
-          <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Points</Text>
-        </View>
-      </View>
 
-      {/* Quick Actions */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Quick Actions</Text>
-        <TouchableOpacity
-          style={[styles.actionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-          onPress={() => {
-            try {
-              // Navigate to Work tab (the tab screen is named "Work", not "Works")
-              navigation.navigate('Work' as never);
-            } catch (error) {
-              logger.error('Failed to navigate to Work', error as Error);
-              Alert.alert('Error', 'Could not navigate to Works screen. Please try again.');
-            }
-          }}
-        >
-          <Text style={[styles.actionTitle, { color: theme.colors.text.primary }]}>Manage Works</Text>
-          <Text style={[styles.actionSubtitle, { color: theme.colors.text.secondary }]}>View and edit your portfolio</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-          onPress={() => {
-            try {
-              // Navigate to Feed screen which shows enquiries and events
-              navigation.navigate('Feed' as never);
-            } catch (error) {
-              logger.error('Failed to navigate to Feed', error as Error);
-              Alert.alert('Error', 'Could not navigate to Enquiries. Please try again.');
-            }
-          }}
-        >
-          <Text style={[styles.actionTitle, { color: theme.colors.text.primary }]}>Enquiries</Text>
-          <Text style={[styles.actionSubtitle, { color: theme.colors.text.secondary }]}>
-            {stats.totalEnquiries} new enquiries
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-          onPress={() => {
-            try {
-              // Navigate to Feed screen which shows events
-              navigation.navigate('Feed' as never);
-            } catch (error) {
-              logger.error('Failed to navigate to Feed', error as Error);
-              Alert.alert('Error', 'Could not navigate to Events. Please try again.');
-            }
-          }}
-        >
-          <Text style={[styles.actionTitle, { color: theme.colors.text.primary }]}>Events</Text>
-          <Text style={[styles.actionSubtitle, { color: theme.colors.text.secondary }]}>
-            {stats.upcomingEvents} upcoming
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Recent Activity */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Recent Activity</Text>
-        <View style={[styles.activityCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.activityText, { color: theme.colors.text.secondary }]}>
-            No recent activity
-          </Text>
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{stats.totalWorks}</Text>
+            <Text style={styles.statLabel}>Works</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{stats.totalEnquiries}</Text>
+            <Text style={styles.statLabel}>Enquiries</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{stats.averageRating.toFixed(1)}</Text>
+            <Text style={styles.statLabel}>Rating</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{stats.totalLoyaltyPoints}</Text>
+            <Text style={styles.statLabel}>Points</Text>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => {
+              try {
+                navigation.navigate('Work' as never);
+              } catch (error) {
+                logger.error('Failed to navigate to Work', error as Error);
+                Alert.alert('Error', 'Could not navigate to Works screen. Please try again.');
+              }
+            }}
+          >
+            <View style={styles.actionIcon}>
+              <Text style={styles.actionIconText}>📋</Text>
+            </View>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Manage Works</Text>
+              <Text style={styles.actionSubtitle}>View and edit your portfolio</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => {
+              try {
+                navigation.navigate('Feed' as never);
+              } catch (error) {
+                logger.error('Failed to navigate to Feed', error as Error);
+                Alert.alert('Error', 'Could not navigate to Enquiries. Please try again.');
+              }
+            }}
+          >
+            <View style={styles.actionIcon}>
+              <Text style={styles.actionIconText}>📩</Text>
+            </View>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Enquiries</Text>
+              <Text style={styles.actionSubtitle}>{stats.totalEnquiries} new enquiries</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => {
+              try {
+                navigation.navigate('Feed' as never);
+              } catch (error) {
+                logger.error('Failed to navigate to Feed', error as Error);
+                Alert.alert('Error', 'Could not navigate to Events. Please try again.');
+              }
+            }}
+          >
+            <View style={styles.actionIcon}>
+              <Text style={styles.actionIconText}>📅</Text>
+            </View>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Events</Text>
+              <Text style={styles.actionSubtitle}>{stats.upcomingEvents} upcoming</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Recent Activity */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <View style={styles.emptyActivity}>
+            <Text style={styles.emptyActivityText}>No recent activity</Text>
+          </View>
+        </View>
+
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
   },
   loadingContainer: {
     flex: 1,
@@ -222,76 +243,174 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  content: {
+    flex: 1,
+  },
+  welcomeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    marginBottom: 8,
+    borderRadius: 12,
     padding: 16,
-    paddingTop: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#FF6B35',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
   },
-  subtitle: {
-    fontSize: 16,
+  avatarText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  welcomeInfo: {
+    flex: 1,
+  },
+  welcomeName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 2,
+  },
+  welcomeRole: {
+    fontSize: 13,
+    color: '#666',
+    textTransform: 'capitalize',
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 16,
-    gap: 12,
+    paddingHorizontal: 12,
+    gap: 8,
+    marginBottom: 8,
   },
   statCard: {
-    width: '47%',
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
+    width: '23%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   statValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FF6B35',
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 11,
+    color: '#666',
+    textAlign: 'center',
   },
   section: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 12,
     padding: 16,
-    paddingTop: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600',
+    color: '#1A1A1A',
     marginBottom: 12,
   },
   actionCard: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  actionIcon: {
+    width: 40,
+    height: 40,
     borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 12,
+    backgroundColor: '#FFF5F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  actionIconText: {
+    fontSize: 20,
+  },
+  actionInfo: {
+    flex: 1,
   },
   actionTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 4,
+    color: '#1A1A1A',
+    marginBottom: 2,
   },
   actionSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
+    color: '#666',
   },
-  activityCard: {
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
+  emptyActivity: {
+    paddingVertical: 20,
+    alignItems: 'center',
   },
-  activityText: {
+  emptyActivityText: {
     fontSize: 14,
-    textAlign: 'center',
+    color: '#999',
+  },
+  bottomPadding: {
+    height: Platform.OS === 'ios' ? 40 : 30,
   },
 });
 
 export default HomeScreen;
-
-
-
-
-
-

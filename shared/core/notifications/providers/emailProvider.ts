@@ -85,7 +85,7 @@ export class TestEmailProvider implements EmailProvider {
       });
 
       const info = await transporter.sendMail({
-        from: process.env.SMTP_FROM || 'noreply@shreeom.com',
+        from: process.env.SMTP_FROM || 'noreply@srj.com',
         to: recipient.email,
         subject: template.subject,
         text: template.text,

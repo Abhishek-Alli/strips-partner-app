@@ -13,6 +13,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -34,21 +35,22 @@ const menuItems: MenuItem[] = [
   { id: '6', title: 'Enquiries', icon: 'email', screen: 'DealerEnquiries' },
   { id: '7', title: 'Shortcuts & links', icon: 'link', screen: 'DealerShortcutsLinks' },
   { id: '8', title: 'Convertors', icon: 'swap-horiz', screen: 'DealerConverter' },
-  { id: '9', title: 'Videos', icon: 'video-library', screen: 'DealerVideos' },
-  { id: '10', title: 'Apply for Dealership', icon: 'assignment', screen: 'ApplyDealership' },
-  { id: '11', title: 'Gallery', icon: 'image', screen: 'DealerGallery' },
-  { id: '12', title: 'Notes', icon: 'note', screen: 'DealerNotes' },
-  { id: '13', title: 'Loyalty Points', icon: 'star', screen: 'LoyaltyPoints' },
-  { id: '14', title: 'Steel Market Updates', icon: 'trending-up', screen: 'SteelMarketUpdates' },
-  { id: '15', title: 'Lectures', icon: 'school', screen: 'Lectures' },
-  { id: '16', title: 'Trading Advices', icon: 'lightbulb', screen: 'TradingAdvices' },
-  { id: '17', title: 'Upcoming Projects', icon: 'construction', screen: 'UpcomingProjects' },
-  { id: '18', title: 'Tenders', icon: 'description', screen: 'Tenders' },
-  { id: '19', title: 'Education Posts', icon: 'library-books', screen: 'EducationPosts' },
-  { id: '20', title: 'Quiz', icon: 'help', screen: 'Quiz' },
-  { id: '21', title: 'Referrals', icon: 'people', screen: 'Referrals' },
-  { id: '22', title: 'Reports & Statistics', icon: 'assessment', screen: 'ReportsStatistics' },
-  { id: '23', title: 'Manage Profile', icon: 'person', screen: 'DealerManageProfile' },
+  { id: '9', title: 'Vaastu Services', icon: 'home-work', screen: 'DealerVaastuServices' },
+  { id: '10', title: 'Videos', icon: 'video-library', screen: 'DealerVideos' },
+  { id: '11', title: 'Apply for Dealership', icon: 'assignment', screen: 'ApplyDealership' },
+  { id: '12', title: 'Gallery', icon: 'image', screen: 'DealerGallery' },
+  { id: '13', title: 'Notes', icon: 'note', screen: 'DealerNotes' },
+  { id: '14', title: 'Loyalty Points', icon: 'star', screen: 'LoyaltyPoints' },
+  { id: '15', title: 'Steel Market Updates', icon: 'trending-up', screen: 'SteelMarketUpdates' },
+  { id: '16', title: 'Lectures', icon: 'school', screen: 'Lectures' },
+  { id: '17', title: 'Trading Advices', icon: 'lightbulb', screen: 'TradingAdvices' },
+  { id: '18', title: 'Upcoming Projects', icon: 'construction', screen: 'UpcomingProjects' },
+  { id: '19', title: 'Tenders', icon: 'description', screen: 'Tenders' },
+  { id: '20', title: 'Education Posts', icon: 'library-books', screen: 'EducationPosts' },
+  { id: '21', title: 'Quiz', icon: 'help', screen: 'Quiz' },
+  { id: '22', title: 'Referrals', icon: 'people', screen: 'Referrals' },
+  { id: '23', title: 'Reports & Statistics', icon: 'assessment', screen: 'ReportsStatistics' },
+  { id: '24', title: 'Manage Profile', icon: 'person', screen: 'DealerManageProfile' },
 ];
 
 const DealerDrawerContent: React.FC = () => {
@@ -73,10 +75,14 @@ const DealerDrawerContent: React.FC = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>LO{'\n'}GO</Text>
+            <Image
+              source={require('../../logo/srj_logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.businessInfo}>
-            <Text style={styles.businessName}>Serines Deals and{'\n'}Traders</Text>
+            <Text style={styles.businessName}>SRJ</Text>
             <Text style={styles.businessDetails}>📍 Location: Ganeshguri</Text>
             <Text style={styles.businessDetails}>Contact information: 9123456780</Text>
           </View>
@@ -144,19 +150,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logoContainer: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 8,
+    width: 56,
+    height: 56,
+    backgroundColor: '#FFF5F2',
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#FFE0D5',
   },
-  logoText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1976D2',
-    textAlign: 'center',
+  logoImage: {
+    width: 48,
+    height: 48,
   },
   businessInfo: {
     flex: 1,

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -7,6 +8,7 @@ import { cleanupExpiredOTPs } from './utils/otp.js';
 import cron from 'node-cron';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import './config/env.config.js'; // Validate environment on startup
+import { initializeSocket } from './services/socket.service.js';
 
 dotenv.config();
 
@@ -29,7 +31,7 @@ app.use('/api', apiLimiter);
 // Root route
 app.get('/', (req, res) => {
   res.json({
-    message: 'Shree Om Backend API',
+    message: 'SRJ Backend API',
     version: '1.0.0',
     status: 'running',
       endpoints: {
@@ -80,9 +82,15 @@ cron.schedule('0 * * * *', () => {
   cleanupExpiredOTPs().catch(console.error);
 });
 
-app.listen(PORT, () => {
+// Create HTTP server + attach Socket.IO
+const server = http.createServer(app);
+const io = initializeSocket(server);
+app.set('io', io);
+
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔌 Socket.IO initialized`);
 });
 
 

@@ -47,6 +47,9 @@ const requiredEnvVars = {
   
   // Push Notifications
   FCM_SERVER_KEY: process.env.FCM_SERVER_KEY,
+
+  // Google Maps
+  GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
 };
 
 // Validate required variables in production
@@ -170,6 +173,11 @@ const config = {
   // Push Notifications
   fcm: {
     serverKey: requiredEnvVars.FCM_SERVER_KEY,
+  },
+
+  // Google Maps
+  googleMaps: {
+    apiKey: requiredEnvVars.GOOGLE_MAPS_API_KEY,
   },
   
   // Feature Flags

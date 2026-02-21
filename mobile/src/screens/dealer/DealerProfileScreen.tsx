@@ -27,7 +27,7 @@ const DealerProfileScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
 
   // Profile Edit fields
-  const [businessName, setBusinessName] = useState('Serines Deals and Traders');
+  const [businessName, setBusinessName] = useState('SRJ');
   const [location, setLocation] = useState('Ganeshguri');
   const [email, setEmail] = useState('example@gmail.com');
   const [phone, setPhone] = useState('9123456780');

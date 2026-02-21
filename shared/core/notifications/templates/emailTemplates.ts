@@ -18,7 +18,7 @@ const getVariable = (variables: Record<string, any>, key: string, defaultValue: 
 
 export const emailTemplates: Record<NotificationEvent, (variables: Record<string, any>) => EmailTemplate> = {
   [NotificationEvent.USER_REGISTERED]: (vars) => ({
-    subject: 'Welcome to Shree Om!',
+    subject: 'Welcome to SRJ!',
     html: `
       <!DOCTYPE html>
       <html>
@@ -35,22 +35,22 @@ export const emailTemplates: Record<NotificationEvent, (variables: Record<string
       <body>
         <div class="container">
           <div class="header">
-            <h1>Welcome to Shree Om!</h1>
+            <h1>Welcome to SRJ!</h1>
           </div>
           <div class="content">
             <p>Hello ${getVariable(vars, 'name', 'User')},</p>
-            <p>Thank you for registering with Shree Om. Your account has been successfully created.</p>
+            <p>Thank you for registering with SRJ. Your account has been successfully created.</p>
             <p>You can now explore our platform and connect with partners and dealers.</p>
             <p>If you have any questions, feel free to contact our support team.</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Shree Om. All rights reserved.</p>
+            <p>© ${new Date().getFullYear()} SRJ. All rights reserved.</p>
           </div>
         </div>
       </body>
       </html>
     `,
-    text: `Welcome to Shree Om!\n\nHello ${getVariable(vars, 'name', 'User')},\n\nThank you for registering with Shree Om. Your account has been successfully created.\n\nYou can now explore our platform and connect with partners and dealers.\n\nIf you have any questions, feel free to contact our support team.\n\n© ${new Date().getFullYear()} Shree Om. All rights reserved.`
+    text: `Welcome to SRJ!\n\nHello ${getVariable(vars, 'name', 'User')},\n\nThank you for registering with SRJ. Your account has been successfully created.\n\nYou can now explore our platform and connect with partners and dealers.\n\nIf you have any questions, feel free to contact our support team.\n\n© ${new Date().getFullYear()} SRJ. All rights reserved.`
   }),
 
   [NotificationEvent.OTP_SENT]: (vars) => ({

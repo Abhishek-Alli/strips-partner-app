@@ -138,6 +138,149 @@ export function calculateSteel(
   return Math.round(concreteVolume * steelPerCubicMeter);
 }
 
+// ──────────────────────────────────────────────
+// ADDITIONAL MATERIAL CALCULATORS
+// ──────────────────────────────────────────────
+
+export interface PaintResult {
+  liters: number;
+  tins: number;
+  coverageNote: string;
+}
+
+/**
+ * Calculate paint required for walls/ceiling
+ * Standard: 1 litre covers ~12 sq m per coat
+ */
+export function calculatePaint(
+  wallArea: number,
+  coats: number = 2,
+  coveragePerLiter: number = 12
+): PaintResult {
+  const liters = Math.ceil((wallArea * coats) / coveragePerLiter);
+  return {
+    liters,
+    tins: Math.ceil(liters / 20),
+    coverageNote: `${coats} coat(s) at ${coveragePerLiter} m²/L`,
+  };
+}
+
+export interface TileResult {
+  tiles: number;
+  boxes: number;
+  wastage: number;
+}
+
+/**
+ * Calculate tiles for floor/wall area (default 600×600mm tile)
+ */
+export function calculateTiles(
+  floorArea: number,
+  tileSizeMm: { length: number; width: number } = { length: 600, width: 600 },
+  wastagePercent: number = 10,
+  tilesPerBox: number = 4
+): TileResult {
+  const tileSqM = (tileSizeMm.length / 1000) * (tileSizeMm.width / 1000);
+  const base    = Math.ceil(floorArea / tileSqM);
+  const wastage = Math.ceil(base * (wastagePercent / 100));
+  const total   = base + wastage;
+  return { tiles: total, boxes: Math.ceil(total / tilesPerBox), wastage };
+}
+
+export type FlooringType = 'vitrified' | 'marble' | 'granite' | 'wooden' | 'ceramic';
+
+export interface FlooringResult {
+  sqft: number;
+  sqm: number;
+  estimatedCostMin: number;
+  estimatedCostMax: number;
+}
+
+const FLOORING_COST_PER_SQFT: Record<FlooringType, { min: number; max: number }> = {
+  vitrified: { min: 50,  max: 120 },
+  marble:    { min: 100, max: 400 },
+  granite:   { min: 80,  max: 250 },
+  wooden:    { min: 150, max: 500 },
+  ceramic:   { min: 30,  max: 80  },
+};
+
+/**
+ * Estimate flooring cost for a given area
+ */
+export function calculateFlooring(areaSqm: number, type: FlooringType = 'vitrified'): FlooringResult {
+  const sqft = areaSqm * 10.7639;
+  const rate  = FLOORING_COST_PER_SQFT[type];
+  return {
+    sqft: Math.round(sqft * 100) / 100,
+    sqm:  areaSqm,
+    estimatedCostMin: Math.round(sqft * rate.min),
+    estimatedCostMax: Math.round(sqft * rate.max),
+  };
+}
+
+export interface ElectricalResult {
+  lightPoints: number;
+  fanPoints: number;
+  socketPoints: number;
+  totalPoints: number;
+  wiringLengthMeters: number;
+  estimatedCost: number;
+}
+
+/**
+ * Estimate electrical wiring requirements
+ * ~1 light per 10 sqm, 1 fan per 12 sqm, 1 socket per 8 sqm
+ */
+export function calculateElectricalWiring(builtUpAreaSqft: number, floors: number = 1): ElectricalResult {
+  const totalSqm    = builtUpAreaSqft * 0.092903 * floors;
+  const lightPoints  = Math.ceil(totalSqm / 10);
+  const fanPoints    = Math.ceil(totalSqm / 12);
+  const socketPoints = Math.ceil(totalSqm / 8);
+  const totalPoints  = lightPoints + fanPoints + socketPoints;
+  return {
+    lightPoints,
+    fanPoints,
+    socketPoints,
+    totalPoints,
+    wiringLengthMeters: totalPoints * 25,
+    estimatedCost: totalPoints * 175,
+  };
+}
+
+export interface PlumbingResult {
+  cpvcLengthMeters: number;
+  pvcLengthMeters: number;
+  fittings: number;
+  estimatedCost: number;
+}
+
+/**
+ * Estimate plumbing pipe requirements
+ */
+export function calculatePlumbingPipes(bathrooms: number, kitchens: number = 1, floors: number = 1): PlumbingResult {
+  const cpvc = (bathrooms * 15 + kitchens * 10) * floors;
+  const pvc  = (bathrooms * 20 + kitchens * 15) * floors;
+  return {
+    cpvcLengthMeters: cpvc,
+    pvcLengthMeters:  pvc,
+    fittings: Math.ceil((cpvc + pvc) * 0.3),
+    estimatedCost: Math.round(cpvc * 250 + pvc * 100),
+  };
+}
+
+export interface WaterproofingResult {
+  liquidMembraneLiters: number;
+  estimatedCost: number;
+}
+
+/**
+ * Calculate waterproofing material requirements (2 coats)
+ */
+export function calculateWaterproofing(roofAreaSqm: number, bathroomAreaSqm: number = 0, coats: number = 2): WaterproofingResult {
+  const liters = Math.ceil((roofAreaSqm + bathroomAreaSqm) * coats);
+  return { liquidMembraneLiters: liters, estimatedCost: liters * 200 };
+}
+
 
 
 

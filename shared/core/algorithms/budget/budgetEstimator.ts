@@ -25,9 +25,11 @@ export interface CostBreakdown {
 }
 
 export interface BudgetResult {
-  totalCost: number; // Total estimated cost in INR
-  costPerSqFt: number; // Cost per square foot
-  costPerSqM: number; // Cost per square meter
+  totalCost: number;
+  materialCost: number;
+  laborCost: number;
+  costPerSqFt: number;
+  costPerSqM: number;
   breakdown: CostBreakdown;
   area: {
     sqFt: number;
@@ -35,6 +37,7 @@ export interface BudgetResult {
   };
   qualityGrade: QualityGrade;
   location: string;
+  locationMultiplier: number;
 }
 
 /**
@@ -95,38 +98,42 @@ export function estimateBudget(input: BudgetInput): BudgetResult {
   };
   
   // Get base cost and location multiplier
-  const baseCostPerSqFt = getBaseCostPerSqFt(qualityGrade, constants);
-  const locationMultiplier = getLocationMultiplier(location, constants);
-  
-  // Calculate total cost
-  const areaSqFt = area.areaInSqFt;
-  const costPerSqFt = baseCostPerSqFt * locationMultiplier;
-  const totalCost = areaSqFt * costPerSqFt;
-  
-  // Calculate cost per square meter
-  const costPerSqM = totalCost / area.areaInSqM;
-  
-  // Calculate breakdown
+  const baseMaterialPerSqFt = constants.baseCostPerSqFt[qualityGrade];
+  const laborPerSqFt        = (constants as any).laborCostPerSqFt?.[qualityGrade] ?? 0;
+  const locationMultiplier  = getLocationMultiplier(location, constants);
+
+  // Calculate costs
+  const areaSqFt      = area.areaInSqFt;
+  const materialCost  = Math.round(areaSqFt * baseMaterialPerSqFt * locationMultiplier);
+  const laborCost     = Math.round(areaSqFt * laborPerSqFt * locationMultiplier);
+  const totalCost     = materialCost + laborCost;
+  const costPerSqFt   = totalCost / areaSqFt;
+  const costPerSqM    = totalCost / area.areaInSqM;
+
+  // Breakdown is applied to material cost only (labour is separate line)
   const breakdown: CostBreakdown = {
-    foundation: Math.round((totalCost * constants.costBreakdownPercentages.foundation) / 100),
-    structure: Math.round((totalCost * constants.costBreakdownPercentages.structure) / 100),
-    finishing: Math.round((totalCost * constants.costBreakdownPercentages.finishing) / 100),
-    electrical: Math.round((totalCost * constants.costBreakdownPercentages.electrical) / 100),
-    plumbing: Math.round((totalCost * constants.costBreakdownPercentages.plumbing) / 100),
-    miscellaneous: Math.round((totalCost * constants.costBreakdownPercentages.miscellaneous) / 100)
+    foundation:   Math.round((materialCost * constants.costBreakdownPercentages.foundation)   / 100),
+    structure:    Math.round((materialCost * constants.costBreakdownPercentages.structure)    / 100),
+    finishing:    Math.round((materialCost * constants.costBreakdownPercentages.finishing)    / 100),
+    electrical:   Math.round((materialCost * constants.costBreakdownPercentages.electrical)   / 100),
+    plumbing:     Math.round((materialCost * constants.costBreakdownPercentages.plumbing)     / 100),
+    miscellaneous:Math.round((materialCost * constants.costBreakdownPercentages.miscellaneous)/ 100),
   };
-  
+
   return {
-    totalCost: Math.round(totalCost),
-    costPerSqFt: Math.round(costPerSqFt * 100) / 100,
-    costPerSqM: Math.round(costPerSqM * 100) / 100,
+    totalCost,
+    materialCost,
+    laborCost,
+    costPerSqFt:  Math.round(costPerSqFt * 100) / 100,
+    costPerSqM:   Math.round(costPerSqM  * 100) / 100,
     breakdown,
     area: {
-      sqFt: Math.round(areaSqFt * 100) / 100,
-      sqM: Math.round(area.areaInSqM * 100) / 100
+      sqFt: Math.round(areaSqFt       * 100) / 100,
+      sqM:  Math.round(area.areaInSqM * 100) / 100,
     },
     qualityGrade,
-    location
+    location,
+    locationMultiplier,
   };
 }
 

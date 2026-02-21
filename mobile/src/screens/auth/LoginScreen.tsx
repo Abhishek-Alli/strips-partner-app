@@ -1,16 +1,14 @@
 /**
  * Login Screen
  *
- * Matches the new UI design with:
- * - Email/Phone toggle tabs
- * - Clean form inputs
- * - Social login options
- * - OTP login option
+ * Clean branded login with email/phone toggle,
+ * social login, OTP option - dealer UI style
  */
 
 import React, { useState } from 'react';
 import {
   View,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -19,8 +17,10 @@ import {
   Alert,
   ScrollView,
   SafeAreaView,
+  StatusBar,
   ActivityIndicator,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { logger } from '../../core/logger';
@@ -32,9 +32,10 @@ const LoginScreen: React.FC = () => {
   const [loginType, setLoginType] = useState<'email' | 'phone'>('email');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithSocial } = useAuth();
   const navigation = useNavigation();
 
   const handleLogin = async () => {
@@ -42,12 +43,10 @@ const LoginScreen: React.FC = () => {
       Alert.alert('Error', `Please enter your ${loginType}`);
       return;
     }
-
     if (!password.trim()) {
       Alert.alert('Error', 'Please enter your password');
       return;
     }
-
     setIsLoading(true);
     try {
       await login(identifier, password);
@@ -62,10 +61,36 @@ const LoginScreen: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     setIsSocialLoading(true);
     try {
-      const socialUser = await socialAuthService.signInWithGoogle();
+      const socialUser =
+        provider === 'google'
+          ? await socialAuthService.signInWithGoogle()
+          : await socialAuthService.signInWithFacebook();
+
+      if (socialUser.idToken) {
+        try {
+          const result = await loginWithSocial(provider, socialUser.idToken);
+          if (result && result.newUser) {
+            navigation.navigate('SignupStep2Social' as never, {
+              userType: UserType.GENERAL_USER,
+              role: UserRole.GENERAL_USER,
+              socialData: {
+                name: result.profile.name,
+                email: result.profile.email,
+                phone: '',
+                socialId: socialUser.id,
+                provider,
+              },
+            } as never);
+          }
+          return;
+        } catch (backendErr) {
+          logger.warn('Backend social verify failed, falling through to signup', backendErr as Error);
+        }
+      }
+
       navigation.navigate('SignupStep2Social' as never, {
         userType: UserType.GENERAL_USER,
         role: UserRole.GENERAL_USER,
@@ -78,308 +103,453 @@ const LoginScreen: React.FC = () => {
         },
       } as never);
     } catch (error: any) {
-      logger.error('Google login failed', error);
-      Alert.alert('Error', error.message || 'Google login failed. Please try again.');
+      logger.error(`${provider} login failed`, error);
+      Alert.alert('Error', error.message || `${provider} login failed. Please try again.`);
     } finally {
       setIsSocialLoading(false);
     }
-  };
-
-  const handleFacebookLogin = async () => {
-    setIsSocialLoading(true);
-    try {
-      const socialUser = await socialAuthService.signInWithFacebook();
-      navigation.navigate('SignupStep2Social' as never, {
-        userType: UserType.GENERAL_USER,
-        role: UserRole.GENERAL_USER,
-        socialData: {
-          name: socialUser.name,
-          email: socialUser.email,
-          phone: socialUser.phone || '',
-          socialId: socialUser.id,
-          provider: socialUser.provider,
-        },
-      } as never);
-    } catch (error: any) {
-      logger.error('Facebook login failed', error);
-      Alert.alert('Error', error.message || 'Facebook login failed. Please try again.');
-    } finally {
-      setIsSocialLoading(false);
-    }
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword' as never);
-  };
-
-  const handleSignup = () => {
-    navigation.navigate('SignupStep1' as never);
-  };
-
-  const handleOTPLogin = () => {
-    navigation.navigate('OTP' as never);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* Header */}
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
 
-        {/* Login Type Toggle */}
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              loginType === 'email' && styles.toggleButtonActive,
-            ]}
-            onPress={() => setLoginType('email')}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                loginType === 'email' && styles.toggleTextActive,
-              ]}
-            >
-              Email
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              loginType === 'phone' && styles.toggleButtonActive,
-            ]}
-            onPress={() => setLoginType('phone')}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                loginType === 'phone' && styles.toggleTextActive,
-              ]}
-            >
-              Phone
-            </Text>
-          </TouchableOpacity>
+        {/* Brand Header */}
+        <View style={styles.brandContainer}>
+          <View style={styles.logoCircle}>
+            <Image
+              source={require("../../logo/srj_logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </View>
+         {/*<Text style={styles.appName}>SRJ</Text>*/}
+          <Text style={styles.tagline}>Making India Stroger</Text>
         </View>
 
-        {/* Input Fields */}
-        <TextInput
-          style={styles.input}
-          placeholder={loginType === 'email' ? 'Email' : 'Phone Number'}
-          placeholderTextColor="#999"
-          value={identifier}
-          onChangeText={setIdentifier}
-          keyboardType={loginType === 'email' ? 'email-address' : 'phone-pad'}
-          autoCapitalize="none"
-        />
+        {/* Form Card */}
+        <View style={styles.card}>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <Text style={styles.cardTitle}>Welcome Back</Text>
+          <Text style={styles.cardSubtitle}>Sign in to your account</Text>
 
-        {/* Forgot Password */}
-        <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        {/* Login Button */}
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Social Login */}
-        <View style={styles.socialContainer}>
-          <Text style={styles.dividerText}>Or continue with</Text>
-
-          <View style={styles.socialButtons}>
+          {/* Email / Phone Toggle */}
+          <View style={styles.toggleRow}>
             <TouchableOpacity
-              style={styles.socialButton}
-              onPress={handleGoogleLogin}
+              style={[styles.toggleBtn, loginType === 'email' && styles.toggleBtnActive]}
+              onPress={() => setLoginType('email')}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons
+                name="email"
+                size={16}
+                color={loginType === 'email' ? '#FFFFFF' : '#888'}
+                style={styles.toggleIcon}
+              />
+              <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>
+                Email
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, loginType === 'phone' && styles.toggleBtnActive]}
+              onPress={() => setLoginType('phone')}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons
+                name="phone"
+                size={16}
+                color={loginType === 'phone' ? '#FFFFFF' : '#888'}
+                style={styles.toggleIcon}
+              />
+              <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>
+                Phone
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Identifier Input */}
+          <View style={styles.inputWrapper}>
+            <MaterialIcons
+              name={loginType === 'email' ? 'alternate-email' : 'phone'}
+              size={20}
+              color="#BBBBBB"
+              style={styles.inputIcon}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={loginType === 'email' ? 'Enter your email' : 'Enter your phone number'}
+              placeholderTextColor="#BBBBBB"
+              value={identifier}
+              onChangeText={setIdentifier}
+              keyboardType={loginType === 'email' ? 'email-address' : 'phone-pad'}
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* Password Input */}
+          <View style={styles.inputWrapper}>
+            <MaterialIcons name="lock-outline" size={20} color="#BBBBBB" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="#BBBBBB"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword((p) => !p)} style={styles.eyeButton}>
+              <MaterialIcons
+                name={showPassword ? 'visibility' : 'visibility-off'}
+                size={20}
+                color="#BBBBBB"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Forgot Password */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword' as never)}
+            style={styles.forgotRow}
+          >
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          {/* Login Button */}
+          <TouchableOpacity
+            style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
+            onPress={handleLogin}
+            disabled={isLoading}
+            activeOpacity={0.85}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.loginBtnText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* OTP Login */}
+          <TouchableOpacity
+            style={styles.otpBtn}
+            onPress={() => navigation.navigate('OTP' as never)}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="sms" size={17} color="#FF6B35" style={{ marginRight: 6 }} />
+            <Text style={styles.otpBtnText}>Login with OTP</Text>
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerLabel}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Social Buttons */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => handleSocialLogin('google')}
               disabled={isSocialLoading}
+              activeOpacity={0.8}
             >
               {isSocialLoading ? (
-                <ActivityIndicator color="#666" size="small" />
+                <ActivityIndicator color="#888" size="small" />
               ) : (
-                <Text style={styles.socialButtonText}>Google</Text>
+                <>
+                  <Text style={styles.googleG}>G</Text>
+                  <Text style={styles.socialBtnText}>Google</Text>
+                </>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.socialButton}
-              onPress={handleFacebookLogin}
+              style={styles.socialBtn}
+              onPress={() => handleSocialLogin('facebook')}
               disabled={isSocialLoading}
+              activeOpacity={0.8}
             >
               {isSocialLoading ? (
-                <ActivityIndicator color="#666" size="small" />
+                <ActivityIndicator color="#888" size="small" />
               ) : (
-                <Text style={styles.socialButtonText}>Facebook</Text>
+                <>
+                  <Text style={styles.facebookF}>f</Text>
+                  <Text style={styles.socialBtnText}>Facebook</Text>
+                </>
               )}
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* OTP Login */}
-        <TouchableOpacity onPress={handleOTPLogin} style={styles.otpLink}>
-          <Text style={styles.otpLinkText}>Login with OTP</Text>
-        </TouchableOpacity>
-
-        {/* Signup Link */}
-        <View style={styles.signupContainer}>
+        {/* Sign Up */}
+        <View style={styles.signupRow}>
           <Text style={styles.signupText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={handleSignup}>
+          <TouchableOpacity onPress={() => navigation.navigate('SignupStep1' as never)}>
             <Text style={styles.signupLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F5',
   },
-  contentContainer: {
-    padding: 24,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    fontStyle: 'italic',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666666',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    marginBottom: 24,
-    gap: 12,
-  },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+
+  // Brand
+  brandContainer: {
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    paddingTop: Platform.OS === 'ios' ? 36 : 40,
+    paddingBottom: 28,
   },
-  toggleButtonActive: {
-    backgroundColor: '#5C6BC0',
-    borderColor: '#5C6BC0',
+  logoCircle: {
+    width: 126,
+    height: 126,
+    borderRadius: 63,
+    backgroundColor: '#FF6B35',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    ...Platform.select({
+      ios: { shadowColor: '#FF6B35', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8 },
+      android: { elevation: 6 },
+    }),
+  },
+
+  logoImage: {
+  width: 100,
+  height: 100,
+  tintColor: '#FFFFFF', 
+},
+
+  logoText: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#3e0505',
+    letterSpacing: 1,
+  },
+  appName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  tagline: {
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '400',
+  },
+
+  // Card
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12 },
+      android: { elevation: 4 },
+    }),
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 22,
+  },
+
+  // Toggle
+  toggleRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 20,
+  },
+  toggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  toggleBtnActive: {
+    backgroundColor: '#FF6B35',
+  },
+  toggleIcon: {
+    marginRight: 5,
   },
   toggleText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    color: '#1A1A1A',
+    color: '#888',
   },
   toggleTextActive: {
     color: '#FFFFFF',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 16 : 12,
-    marginBottom: 16,
-    fontSize: 16,
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    color: '#5C6BC0',
-    fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: '#5C6BC0',
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  loginButtonDisabled: {
-    opacity: 0.7,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
     fontWeight: '600',
   },
-  socialContainer: {
-    marginVertical: 16,
+
+  // Inputs
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9F9F9',
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    borderRadius: 12,
+    marginBottom: 14,
+    paddingHorizontal: 14,
   },
-  dividerText: {
-    textAlign: 'center',
-    marginBottom: 16,
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1A1A1A',
+    paddingVertical: Platform.OS === 'ios' ? 14 : 11,
+  },
+  eyeButton: {
+    padding: 4,
+  },
+
+  // Forgot
+  forgotRow: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+    marginTop: 2,
+  },
+  forgotText: {
+    fontSize: 13,
+    color: '#FF6B35',
+    fontWeight: '500',
+  },
+
+  // Login Button
+  loginBtn: {
+    backgroundColor: '#FF6B35',
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginBottom: 12,
+    ...Platform.select({
+      ios: { shadowColor: '#FF6B35', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 4 },
+    }),
+  },
+  loginBtnDisabled: {
+    opacity: 0.7,
+  },
+  loginBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  // OTP Button
+  otpBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FF6B35',
+    borderRadius: 14,
+    paddingVertical: 13,
+    marginBottom: 22,
+  },
+  otpBtnText: {
     fontSize: 14,
-    color: '#666666',
+    fontWeight: '600',
+    color: '#FF6B35',
   },
-  socialButtons: {
+
+  // Divider
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#EEEEEE',
+  },
+  dividerLabel: {
+    fontSize: 12,
+    color: '#BBBBBB',
+    marginHorizontal: 12,
+    fontWeight: '500',
+  },
+
+  // Social
+  socialRow: {
     flexDirection: 'row',
     gap: 12,
   },
-  socialButton: {
+  socialBtn: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  socialButtonText: {
-    color: '#1A1A1A',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  otpLink: {
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  otpLinkText: {
-    color: '#5C6BC0',
-    fontSize: 14,
-  },
-  signupContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 16,
+    paddingVertical: 13,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#EEEEEE',
+    backgroundColor: '#FAFAFA',
+    gap: 8,
   },
-  signupText: {
-    color: '#666666',
-    fontSize: 14,
+  googleG: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#4285F4',
   },
-  signupLink: {
-    color: '#1A1A1A',
+  facebookF: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#1877F2',
+  },
+  socialBtnText: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#1A1A1A',
+  },
+
+  // Sign Up
+  signupRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#888',
+  },
+  signupLink: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FF6B35',
   },
 });
 

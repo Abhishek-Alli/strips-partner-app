@@ -5,6 +5,10 @@ import { authService } from '../services/auth.service';
 interface AuthContextType extends AuthState {
   login: (identifier: string, password?: string) => Promise<void>;
   loginWithOTP: (phone: string, otp: string) => Promise<void>;
+  loginWithSocial: (
+    provider: 'google' | 'facebook',
+    idToken: string,
+  ) => Promise<{ newUser: true; profile: { email: string; name: string; picture?: string } } | void>;
   verifyRegistrationOTP: (email: string, phone: string, otp: string) => Promise<void>;
   sendOTP: (phone: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -112,6 +116,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  const loginWithSocial = useCallback(async (
+    provider: 'google' | 'facebook',
+    idToken: string,
+  ) => {
+    const result = await authService.socialLogin(provider, idToken);
+    if ('newUser' in result && result.newUser) {
+      return result as { newUser: true; profile: { email: string; name: string; picture?: string } };
+    }
+    const r = result as any;
+    setState({
+      user: r.user,
+      accessToken: r.accessToken,
+      refreshToken: r.refreshToken,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -147,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         sendOTP,
         loginWithOTP,
+        loginWithSocial,
         verifyRegistrationOTP,
         logout,
         hasRole,

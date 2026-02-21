@@ -117,6 +117,25 @@ class AuthService {
     await authApi.post('/register/social', data);
   }
 
+  /**
+   * Social login — verify provider token with backend.
+   * Returns either a full LoginResponse (existing user) or
+   * { newUser: true, profile } for users who still need to register.
+   */
+  async socialLogin(
+    provider: 'google' | 'facebook',
+    idToken: string,
+  ): Promise<LoginResponse | { newUser: true; profile: { email: string; name: string; picture?: string } }> {
+    const endpoint = provider === 'google' ? '/social/google' : '/social/facebook';
+    const body = provider === 'google' ? { idToken } : { accessToken: idToken };
+    const response = await authApi.post(endpoint, body);
+    if (response.data.newUser) {
+      return response.data as { newUser: true; profile: { email: string; name: string; picture?: string } };
+    }
+    await this.setAuthData(response.data as LoginResponse);
+    return response.data as LoginResponse;
+  }
+
   async logout(): Promise<void> {
     await AsyncStorage.multiRemove([
       this.ACCESS_TOKEN_KEY,

@@ -1,4 +1,5 @@
 import { query } from '../config/database.js';
+import { getConverterCategories, convert } from '../services/converter.service.js';
 
 const logger = {
   error: (message, error) => {
@@ -185,13 +186,12 @@ export const getVideos = async (req, res) => {
 // ========================================
 
 /**
- * Get unit converters
+ * Get unit converter categories and units
  */
 export const getUnitConverters = async (req, res) => {
   try {
-    // For now, return empty array - converters might be static or not in DB yet
-    // This can be expanded when converter table is created
-    res.json({ converters: [] });
+    const categories = getConverterCategories();
+    res.json({ categories });
   } catch (error) {
     logger.error('Error fetching converters:', error);
     res.status(500).json({ error: 'Failed to fetch converters' });
@@ -199,21 +199,26 @@ export const getUnitConverters = async (req, res) => {
 };
 
 /**
- * Convert units
+ * Convert a value between units
+ * Body: { category, fromUnit, toUnit, value }
  */
 export const convertUnit = async (req, res) => {
   try {
-    const { value, converterId } = req.body;
-    
-    if (value === undefined || !converterId) {
-      return res.status(400).json({ error: 'Value and converterId are required' });
+    const { category, fromUnit, toUnit, value } = req.body;
+
+    if (!category || !fromUnit || !toUnit || value === undefined) {
+      return res.status(400).json({
+        error: 'category, fromUnit, toUnit, and value are required',
+      });
     }
-    
-    // For now, return error - converter logic needs to be implemented
-    // This can be expanded when converter system is built
-    res.status(501).json({ error: 'Unit conversion not yet implemented' });
+
+    const { result, formula } = convert(category, fromUnit, toUnit, parseFloat(value));
+    res.json({ result, formula });
   } catch (error) {
     logger.error('Error converting unit:', error);
+    if (error.message?.includes('Unknown')) {
+      return res.status(400).json({ error: error.message });
+    }
     res.status(500).json({ error: 'Failed to convert unit' });
   }
 };
