@@ -26,7 +26,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <AppBar position="static" sx={{ backgroundColor: '#fff', color: '#000' }}>
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Shree Om Admin
+              SRJ Strips & Pipes
             </Typography>
             <Typography variant="body2" sx={{ mr: 2 }}>
               {user?.name} ({user?.role})

@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline, Box, CircularProgress } from '
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useTokenRefresh } from './hooks/useTokenRefresh';
 import { AppLayout } from './components/layout/AppLayout';
+import { AdminLayout } from './components/layout/AdminLayout';
 import { ProtectedRoute } from './components/guards/ProtectedRoute';
 import { ErrorBoundary } from './core/errorBoundary/ErrorBoundary';
 import { UserRole } from './types/auth.types';
@@ -79,6 +80,7 @@ const DealerAnalyticsPage = createLazyComponent(() => import('./pages/dealer/Dea
 const DealerProductsPage = createLazyComponent(() => import('./pages/dealer/DealerProductsPage'));
 const DealerFeedbacksPage = createLazyComponent(() => import('./pages/dealer/DealerFeedbacksPage'));
 const DealerOffersPage = createLazyComponent(() => import('./pages/dealer/DealerOffersPage'));
+const VastuPage = createLazyComponent(() => import('./pages/admin/VastuPage'));
 const SettingsPage = createLazyComponent(() => import('./pages/settings/SettingsPage'));
 const PrivacyPolicyPage = createLazyComponent(() => import('./pages/legal/PrivacyPolicyPage'));
 const TermsAndConditionsPage = createLazyComponent(() => import('./pages/legal/TermsAndConditionsPage'));
@@ -194,11 +196,9 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/settings"
         element={
-          <ProtectedRoute>
-            <AppLayout>
-              <SettingsPage />
-            </AppLayout>
-          </ProtectedRoute>
+          <AdminLayout title="Settings">
+            <SettingsPage />
+          </AdminLayout>
         }
       />
       {/* Admin Routes */}
@@ -313,6 +313,10 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/admin/checklists"
         element={<ChecklistsPage />}
+      />
+      <Route
+        path="/admin/vastu"
+        element={<VastuPage />}
       />
       {/* Partner Routes */}
       <Route

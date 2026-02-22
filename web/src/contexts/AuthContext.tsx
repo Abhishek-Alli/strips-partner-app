@@ -114,12 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasPermission = useCallback((resource: string, action: string): boolean => {
     if (!state.user) return false;
-    // Use shared permissions config
+    // Admin always has all permissions — short-circuit before config check
+    if (state.user.role === UserRole.ADMIN || (state.user.role as string).toUpperCase() === 'ADMIN') return true;
     try {
       return checkPermission(state.user.role, resource, action);
     } catch (error) {
-      // Fallback: Admin has all permissions, others need explicit check
-      if (state.user.role === 'ADMIN') return true;
       console.warn('Permission check failed, using fallback', error);
       return false;
     }

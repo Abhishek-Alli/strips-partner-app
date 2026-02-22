@@ -1,12 +1,16 @@
 /**
  * Admin Layout Component
  *
- * Wrapper layout for admin pages with sidebar and header
+ * Wrapper layout for admin pages with collapsible sidebar and header
  */
 
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import { AdminSidebar, ADMIN_SIDEBAR_WIDTH } from './AdminSidebar';
+import {
+  AdminSidebar,
+  ADMIN_SIDEBAR_WIDTH,
+  ADMIN_SIDEBAR_COLLAPSED_WIDTH,
+} from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { ProtectedRoute } from '../guards/ProtectedRoute';
 import { UserRole } from '../../types/auth.types';
@@ -37,10 +41,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   requiredPermission,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
-  const handleMobileToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const sidebarWidth = collapsed ? ADMIN_SIDEBAR_COLLAPSED_WIDTH : ADMIN_SIDEBAR_WIDTH;
 
   const content = (
     <Box
@@ -54,13 +57,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       <Box
         component="nav"
         sx={{
-          width: { lg: ADMIN_SIDEBAR_WIDTH, xs: 0 },
+          width: { lg: sidebarWidth, xs: 0 },
           flexShrink: 0,
+          transition: 'width 0.25s ease',
         }}
       >
         <AdminSidebar
           mobileOpen={mobileOpen}
           onMobileClose={() => setMobileOpen(false)}
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((c) => !c)}
         />
       </Box>
 
@@ -71,8 +77,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
-          width: '100%',
+          minWidth: 0,
           minHeight: '100vh',
+          transition: 'margin-left 0.25s ease',
         }}
       >
         {/* Header */}
@@ -85,7 +92,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           showAddButton={showAddButton}
           addButtonLabel={addButtonLabel}
           onAddClick={onAddClick}
-          onMenuClick={handleMobileToggle}
+          onMenuClick={() => setMobileOpen(true)}
         />
 
         {/* Page Content */}
